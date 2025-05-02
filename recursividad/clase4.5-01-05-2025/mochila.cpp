@@ -9,18 +9,11 @@ struct Item
   int peso;
 };
 
-struct Sol
-{
-  int valor;
-  int peso;
-  int index;
-};
-
 // Variables globales
 int primera_solucion_valor = -1;
 bool primera_solucion[MAX_ITEMS] = {false};
 int total_soluciones = 0;
-Sol soluciones[MAX_ITEMS] = {};
+Item soluciones[MAX_ITEMS] = {};
 
 void imprimirSolucion(Item items[], int num_items, bool seleccion[], int valor, int peso)
 {
@@ -87,7 +80,7 @@ void guardarSoluciones(Item items[], int num_items, bool seleccion_actual[], int
       acum_peso += items[k].peso;
     }
   }
-  soluciones[total_soluciones - 1] = {valor : acum_valor, peso : acum_peso, index : total_soluciones - 1};
+  soluciones[total_soluciones] = {valor : acum_valor, peso : acum_peso};
   // cout << "cual es el index: " << total_soluciones - 1 << endl;
   // cout << "cual es el valor: " << acum_valor << endl;
   // cout << "cual es el peso: " << acum_peso << endl;
@@ -111,7 +104,7 @@ void mejorSolucion()
       }
     }
   }
-  cout << "La mejor solucion es la #" << soluciones[mejor].index << "con un valor de " << soluciones[mejor].valor << " y un peso de " << soluciones[mejor].peso << endl;
+  cout << "La mejor solucion es la #" << mejor + 1 << " con un valor de " << soluciones[mejor].valor << " y un peso de " << soluciones[mejor].peso << endl;
 }
 
 // todas las soluciones válidas
