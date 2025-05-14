@@ -237,6 +237,7 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
     // cout <<"idsPiso: " << torre[i] << endl;
     // iteramos en el piso
     string turno = "malos";
+    cout << "Piso " << i + 1 << endl;
     for (int j = 0; j < cantidad; j++)
     {
       // cout << "Defensor: " << defensoresPiso[j].nombre << endl;
@@ -248,7 +249,9 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
       }
       else
       {
-        // combate en piso actual
+        // combate en piso
+        cout << "El retador " << retadores[index].nombre << "(" << retadores[index].life << " está combatiendo en contra del defensor " << defensoresPiso[j].nombre << endl;
+
         while (retadores[index].life > 0 && defensoresPiso[j].life > 0)
         {
           if (turno == "malos")
@@ -266,10 +269,13 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
           if (defensoresPiso[j].life <= 0)
           {
             cout << "El defensor " << defensoresPiso[j].nombre << " ha sido derrotado." << endl;
+            defensoresPiso[j].life = 0;
             turno = "buenos";
           }
           if (retadores[index].life <= 0)
           {
+            cout << "El retador " << retadores[index].nombre << " ha sido derrotado." << endl;
+            retadores[index].life = 0;
             turno = "malos";
           }
           cout << "Ronda terminada" << endl;
@@ -298,46 +304,46 @@ int main()
 {
   Numer numoris[MAX_NUMORIS];
   string pisos[MAX_PISOS];
-  int numNumoris = leerNumorisDB("NumorisDB.in", numoris);
+  int numNumoris = leerNumorisDB("NumorisDB2.in", numoris);
   cout << "Número de Numoris leídos: " << numNumoris << endl;
   cout << "Numero de archivo a leer" << endl;
   int torre;
   cin >> torre;
   int numTorres = leerTorre(torre, pisos);
-  cout << "Número de Torres leídas: " << numTorres << endl;
-  // Imprimir el contenido de numoris
-  cout << "Contenido de Numoris:" << endl;
-  for (int i = 0; i < numNumoris; i++)
-  {
-    cout << "ID: " << numoris[i].id << ", Nombre: " << numoris[i].nombre << ", Tipo: " << numoris[i].tipo
-         << ", Daño: " << numoris[i].dmg << ", Vida: " << numoris[i].life << endl;
-  }
-  // Imprimir el contenido de pisos
-  cout << "Contenido de Torres:" << endl;
-  for (int i = 0; i < numTorres; i++)
-  {
-    // cout << "Piso " << i + 1 << ": " << pisos[i] << endl;
-    // for (int j = 0; j < pisos[i].length(); j++)
-    // {
-    //   if (pisos[i][j] == ' ')
-    //   {
-    //     continue;
-    //   }
-    //   else
-    //   {
-    //     int contador = 0;
-    //     cout << "Piso " << i + 1 << ": " << pisos[i][j] << endl;
-    //   }
-    // }
-    int numeros[10];
-    int cantidad = dividirEnNumeros(pisos[i], numeros);
-    cout << "Piso " << i + 1 << ": ";
-    for (int j = 0; j < cantidad; j++)
-    {
-      cout << numeros[j] << " ";
-    }
-    cout << endl;
-  }
+  // cout << "Número de Torres leídas: " << numTorres << endl;
+  // // Imprimir el contenido de numoris
+  // cout << "Contenido de Numoris:" << endl;
+  // for (int i = 0; i < numNumoris; i++)
+  // {
+  //   cout << "ID: " << numoris[i].id << ", Nombre: " << numoris[i].nombre << ", Tipo: " << numoris[i].tipo
+  //        << ", Daño: " << numoris[i].dmg << ", Vida: " << numoris[i].life << endl;
+  // }
+  // // Imprimir el contenido de pisos
+  // cout << "Contenido de Torres:" << endl;
+  // for (int i = 0; i < numTorres; i++)
+  // {
+  //   // cout << "Piso " << i + 1 << ": " << pisos[i] << endl;
+  //   // for (int j = 0; j < pisos[i].length(); j++)
+  //   // {
+  //   //   if (pisos[i][j] == ' ')
+  //   //   {
+  //   //     continue;
+  //   //   }
+  //   //   else
+  //   //   {
+  //   //     int contador = 0;
+  //   //     cout << "Piso " << i + 1 << ": " << pisos[i][j] << endl;
+  //   //   }
+  //   // }
+  //   int numeros[10];
+  //   int cantidad = dividirEnNumeros(pisos[i], numeros);
+  //   cout << "Piso " << i + 1 << ": ";
+  //   for (int j = 0; j < cantidad; j++)
+  //   {
+  //     cout << numeros[j] << " ";
+  //   }
+  //   cout << endl;
+  // }
   cout << (combate(generarEquipo(), pisos, numTorres, numoris) ? "Ganamos" : "Perdimos") << endl;
   return 0;
 }
