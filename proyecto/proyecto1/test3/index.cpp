@@ -4,8 +4,8 @@
 using namespace std;
 
 const int MAX_NUMORIS = 100; // Máximo número de Numoris en la base de datos
-const int MAX_PISOS = 10;    // Máximo número de pisos en cada torre
-const int MAX_TORRES = 100;  // Máximo número de torres
+const int MAX_PISOS = 100;   // Máximo número de pisos en cada torre
+const int MAX_NUMEROS = 10;  // Máximo número de números en una línea
 const int MAX_EQUIPO = 6;    // Tamaño fijo del equipo
 
 struct Elemento
@@ -188,6 +188,109 @@ int dividirEnNumeros(string linea, int numeros[])
   return cantidad; // devuelve la cantidad de números encontrados
 }
 
+// obtener numores
+void obtenerNumoris(Numer newNumoris[], Numer numoris[], int ids[], int max)
+{
+  for (int i = 0; i < max; i++)
+  {
+    int index = buscarNumber(ids[i], numoris, MAX_NUMORIS);
+    if (index != -1)
+    {
+      // cout << "Encontrado el Numoris con ID: " << ids[i] << endl;
+      newNumoris[i] = numoris[index];
+    }
+    else
+    {
+      cout << "No se encontró el Numoris con ID: " << ids[i] << endl;
+    }
+  }
+}
+
+// obtener el primer miembro del equipo en condiciones de combatir
+int obtenerNumerActo(Numer retadores[], int max)
+{
+  for (int i = 0; i < max; i++)
+  {
+    if (retadores[i].life > 0)
+    {
+      return i;
+    }
+  }
+  return -1; // si no hay miembros en condiciones de combatir
+}
+
+bool combate(string equipo, string torre[], int pisos, Numer numoris[])
+{
+  int idsRetadores[MAX_EQUIPO];
+  int maxRetadores = dividirEnNumeros(equipo, idsRetadores);
+  Numer retadores[MAX_EQUIPO];
+  // armar equipo
+  obtenerNumoris(retadores, numoris, idsRetadores, maxRetadores);
+  // recorrer los pisos
+  for (int i = 0; i < pisos; i++)
+  {
+    int idsPiso[MAX_NUMEROS];
+    int cantidad = dividirEnNumeros(torre[i], idsPiso);
+    Numer defensoresPiso[MAX_NUMEROS];
+    // armar defensores
+    obtenerNumoris(defensoresPiso, numoris, idsPiso, cantidad);
+    // cout <<"idsPiso: " << torre[i] << endl;
+    // iteramos en el piso
+    string turno = "malos";
+    for (int j = 0; j < cantidad; j++)
+    {
+      // cout << "Defensor: " << defensoresPiso[j].nombre << endl;
+      // obtenemos al malo
+      int index = obtenerNumerActo(retadores, maxRetadores);
+      if (index == -1)
+      {
+        return false;
+      }
+      else
+      {
+        // combate en piso actual
+        while (retadores[index].life > 0 && defensoresPiso[j].life > 0)
+        {
+          if (turno == "malos")
+          {
+            defensoresPiso[j].life -= calcularDano(retadores[index], defensoresPiso[j]);
+            cout << "El daño de " << retadores[index].nombre << " a " << defensoresPiso[j].nombre << " es: " << calcularDano(retadores[index], defensoresPiso[j]) << endl;
+            turno = "buenos";
+          }
+          else
+          {
+            retadores[index].life -= calcularDano(defensoresPiso[j], retadores[index]);
+            cout << "El daño de " << defensoresPiso[j].nombre << " a " << retadores[index].nombre << " es: " << calcularDano(defensoresPiso[j], retadores[index]) << endl;
+            turno = "malos";
+          }
+          if (defensoresPiso[j].life <= 0)
+          {
+            cout << "El defensor " << defensoresPiso[j].nombre << " ha sido derrotado." << endl;
+            turno = "buenos";
+          }
+          if (retadores[index].life <= 0)
+          {
+            turno = "malos";
+          }
+        }
+      }
+    }
+
+    // for (int j = 0; j < cantidad; j++)
+    // {
+    //   int index = buscarNumber(idsPiso[j], numoris, MAX_NUMORIS);
+    //   Numer defensor = numoris[index];
+    //   for (int k = 0; k < MAX_EQUIPO; k++)
+    //   {
+    //     Numer atacante = arrEquipo[k];
+    //     float dano = calcularDano(atacante, defensor);
+    //     cout << "El daño de " << atacante.nombre << " a " << defensor.nombre << " es: " << dano << endl;
+    //   }
+    // }
+  }
+  return true;
+}
+
 int main()
 {
   Numer numoris[MAX_NUMORIS];
@@ -232,5 +335,6 @@ int main()
     }
     cout << endl;
   }
+  cout << (combate(generarEquipo(), pisos, numTorres, numoris) ? "Ganamos" : "Perdimos") << endl;
   return 0;
 }
