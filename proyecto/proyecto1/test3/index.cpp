@@ -8,6 +8,16 @@ const int MAX_PISOS = 10;    // Máximo número de pisos en cada torre
 const int MAX_TORRES = 100;  // Máximo número de torres
 const int MAX_EQUIPO = 6;    // Tamaño fijo del equipo
 
+struct Elemento
+{
+  string agua;
+  string fuego;
+  string tierra;
+  string aire;
+};
+
+const Elemento ELEMENTOS = {"AGUA", "FUEGO", "TIERRA", "AIRE"};
+
 struct Numer
 {
   int id;
@@ -73,6 +83,111 @@ int leerTorre(int numTorre, string pisos[])
   }
 }
 
+// convertir a Mayusculas
+string toUpperCase(string s)
+{
+  for (int i = 0; i < s.length(); i++)
+  {
+    if (s[i] >= 'a' && s[i] <= 'z')
+    {
+      s[i] = s[i] - 'a' + 'A';
+    }
+  }
+  return s;
+}
+
+// Calcular el daño
+float calcularDano(Numer atacante, Numer defensor)
+{
+  if (toUpperCase(atacante.tipo) == ELEMENTOS.agua && toUpperCase(defensor.tipo) == ELEMENTOS.fuego)
+  {
+    return atacante.dmg * 2;
+  }
+  if (toUpperCase(atacante.tipo) == ELEMENTOS.fuego && toUpperCase(defensor.tipo) == ELEMENTOS.agua)
+  {
+    return atacante.dmg / 2;
+  }
+  if (toUpperCase(atacante.tipo) == ELEMENTOS.fuego && toUpperCase(defensor.tipo) == ELEMENTOS.tierra)
+  {
+    return atacante.dmg * 2;
+  }
+  if (toUpperCase(atacante.tipo) == ELEMENTOS.tierra && toUpperCase(defensor.tipo) == ELEMENTOS.fuego)
+  {
+    return atacante.dmg / 2;
+  }
+  if (toUpperCase(atacante.tipo) == ELEMENTOS.tierra && toUpperCase(defensor.tipo) == ELEMENTOS.aire)
+  {
+    return atacante.dmg * 2;
+  }
+  if (toUpperCase(atacante.tipo) == ELEMENTOS.aire && toUpperCase(defensor.tipo) == ELEMENTOS.tierra)
+  {
+    return atacante.dmg / 2;
+  }
+  if (toUpperCase(atacante.tipo) == ELEMENTOS.aire && toUpperCase(defensor.tipo) == ELEMENTOS.agua)
+  {
+    return atacante.dmg * 2;
+  }
+  if (toUpperCase(atacante.tipo) == ELEMENTOS.agua && toUpperCase(defensor.tipo) == ELEMENTOS.aire)
+  {
+    return atacante.dmg / 2;
+  }
+  return atacante.dmg;
+}
+
+int buscarNumber(int id, Numer numoris[], int numNumoris)
+{
+  for (int i = 0; i < numNumoris; i++)
+  {
+    if (numoris[i].id == id)
+    {
+      return i;
+    }
+  }
+  return -1;
+}
+
+// generar equipo
+
+string generarEquipo()
+{
+  return "2 1 3 4 5 6";
+}
+
+// combate
+//  bool combate(string equipo, string piso) {
+//    int idNumber, idEqupo;
+//    for(int i = 0; i < piso.length(); i++) {
+//      if(piso[i] == ' ') {
+//        continue;
+//      }
+//      else {
+//       idNumber = stoi(piso[i]);
+//      }
+//    }
+//    return true;
+//  }
+
+int dividirEnNumeros(string linea, int numeros[])
+{
+  int n = linea.length();
+  string numero = "";
+  int cantidad = 0;
+
+  for (int i = 0; i <= n; i++)
+  {
+    if (i < n && linea[i] != ' ')
+    {
+      numero += linea[i]; // va acumulando los dígitos del número
+    }
+    else if (!numero.empty())
+    {
+      numeros[cantidad++] = stoi(numero); // convierte el string a entero
+      numero = "";                        // limpia para el próximo número
+    }
+  }
+  return cantidad; // devuelve la cantidad de números encontrados
+}
+
 int main()
 {
   Numer numoris[MAX_NUMORIS];
@@ -96,19 +211,26 @@ int main()
   for (int i = 0; i < numTorres; i++)
   {
     // cout << "Piso " << i + 1 << ": " << pisos[i] << endl;
-    for (int j = 0; j < pisos[i].length(); j++)
+    // for (int j = 0; j < pisos[i].length(); j++)
+    // {
+    //   if (pisos[i][j] == ' ')
+    //   {
+    //     continue;
+    //   }
+    //   else
+    //   {
+    //     int contador = 0;
+    //     cout << "Piso " << i + 1 << ": " << pisos[i][j] << endl;
+    //   }
+    // }
+    int numeros[10];
+    int cantidad = dividirEnNumeros(pisos[i], numeros);
+    cout << "Piso " << i + 1 << ": ";
+    for (int j = 0; j < cantidad; j++)
     {
-      if (pisos[i][j] == ' ')
-      {
-        continue;
-      }
-      else
-      {
-
-        cout << "Piso " << i + 1 << ": " << pisos[i][j] << endl;
-      }
+      cout << numeros[j] << " ";
     }
+    cout << endl;
   }
-
   return 0;
 }
