@@ -272,6 +272,9 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
           {
             turno = "malos";
           }
+          cout << "Ronda terminada" << endl;
+          cout << "Vida del Malo " << retadores[index].nombre << ": " << retadores[index].life << endl;
+          cout << "Vida de Bueno " << defensoresPiso[j].nombre << ": " << defensoresPiso[j].life << endl;
         }
       }
     }
