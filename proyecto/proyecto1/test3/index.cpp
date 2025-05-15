@@ -10,10 +10,10 @@ const int MAX_EQUIPO = 6;    // Tamaño fijo del equipo
 
 struct Elemento
 {
-  string agua;
-  string fuego;
-  string tierra;
-  string aire;
+  string water;
+  string fire;
+  string earth;
+  string air;
 };
 
 const Elemento ELEMENTOS = {"AGUA", "FUEGO", "TIERRA", "AIRE"};
@@ -21,16 +21,10 @@ const Elemento ELEMENTOS = {"AGUA", "FUEGO", "TIERRA", "AIRE"};
 struct Numer
 {
   int id;
-  string nombre;
-  string tipo;
-  float dmg;
+  string name;
+  string type;
+  float damage;
   float life;
-};
-
-struct Piso
-{
-  string numers;
-  int piso;
 };
 
 // Leer el archivo NumorisDB.in
@@ -44,7 +38,7 @@ int leerNumorisDB(string filename, Numer numoris[])
     file >> n;
     for (int i = 0; i < n; i++)
     {
-      file >> numoris[i].id >> numoris[i].nombre >> numoris[i].tipo >> numoris[i].dmg >> numoris[i].life;
+      file >> numoris[i].id >> numoris[i].name >> numoris[i].type >> numoris[i].damage >> numoris[i].life;
     }
     file.close();
     return n;
@@ -99,39 +93,39 @@ string toUpperCase(string s)
 // Calcular el daño
 float calcularDano(Numer atacante, Numer defensor)
 {
-  if (toUpperCase(atacante.tipo) == ELEMENTOS.agua && toUpperCase(defensor.tipo) == ELEMENTOS.fuego)
+  if (toUpperCase(atacante.type) == ELEMENTOS.water && toUpperCase(defensor.type) == ELEMENTOS.fire)
   {
-    return atacante.dmg * 2;
+    return atacante.damage * 2;
   }
-  if (toUpperCase(atacante.tipo) == ELEMENTOS.fuego && toUpperCase(defensor.tipo) == ELEMENTOS.agua)
+  if (toUpperCase(atacante.type) == ELEMENTOS.fire && toUpperCase(defensor.type) == ELEMENTOS.water)
   {
-    return atacante.dmg / 2;
+    return atacante.damage / 2;
   }
-  if (toUpperCase(atacante.tipo) == ELEMENTOS.fuego && toUpperCase(defensor.tipo) == ELEMENTOS.tierra)
+  if (toUpperCase(atacante.type) == ELEMENTOS.fire && toUpperCase(defensor.type) == ELEMENTOS.earth)
   {
-    return atacante.dmg * 2;
+    return atacante.damage * 2;
   }
-  if (toUpperCase(atacante.tipo) == ELEMENTOS.tierra && toUpperCase(defensor.tipo) == ELEMENTOS.fuego)
+  if (toUpperCase(atacante.type) == ELEMENTOS.earth && toUpperCase(defensor.type) == ELEMENTOS.fire)
   {
-    return atacante.dmg / 2;
+    return atacante.damage / 2;
   }
-  if (toUpperCase(atacante.tipo) == ELEMENTOS.tierra && toUpperCase(defensor.tipo) == ELEMENTOS.aire)
+  if (toUpperCase(atacante.type) == ELEMENTOS.earth && toUpperCase(defensor.type) == ELEMENTOS.air)
   {
-    return atacante.dmg * 2;
+    return atacante.damage * 2;
   }
-  if (toUpperCase(atacante.tipo) == ELEMENTOS.aire && toUpperCase(defensor.tipo) == ELEMENTOS.tierra)
+  if (toUpperCase(atacante.type) == ELEMENTOS.air && toUpperCase(defensor.type) == ELEMENTOS.earth)
   {
-    return atacante.dmg / 2;
+    return atacante.damage / 2;
   }
-  if (toUpperCase(atacante.tipo) == ELEMENTOS.aire && toUpperCase(defensor.tipo) == ELEMENTOS.agua)
+  if (toUpperCase(atacante.type) == ELEMENTOS.air && toUpperCase(defensor.type) == ELEMENTOS.water)
   {
-    return atacante.dmg * 2;
+    return atacante.damage * 2;
   }
-  if (toUpperCase(atacante.tipo) == ELEMENTOS.agua && toUpperCase(defensor.tipo) == ELEMENTOS.aire)
+  if (toUpperCase(atacante.type) == ELEMENTOS.water && toUpperCase(defensor.type) == ELEMENTOS.air)
   {
-    return atacante.dmg / 2;
+    return atacante.damage / 2;
   }
-  return atacante.dmg;
+  return atacante.damage;
 }
 
 int buscarNumber(int id, Numer numoris[], int numNumoris)
@@ -238,9 +232,9 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
     // iteramos en el piso
     string turno = "malos";
     cout << "Piso " << i + 1 << endl;
-    for (int j = 0; j < cantidad; j++)
+    for (int j = 0; j < cantidad;)
     {
-      // cout << "Defensor: " << defensoresPiso[j].nombre << endl;
+      // cout << "Defensor: " << defensoresPiso[j].name << endl;
       // obtenemos al malo
       int index = obtenerNumerActo(retadores, maxRetadores);
       if (index == -1)
@@ -250,37 +244,42 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
       else
       {
         // combate en piso
-        cout << "El retador " << retadores[index].nombre << "(" << retadores[index].life << " está combatiendo en contra del defensor " << defensoresPiso[j].nombre << endl;
+        cout << "El retador " << retadores[index].name << "(" << retadores[index].life << ")" << " está combatiendo en contra del defensor " << defensoresPiso[j].name << "(" << defensoresPiso[j].life << ")" << endl;
 
         while (retadores[index].life > 0 && defensoresPiso[j].life > 0)
         {
           if (turno == "malos")
           {
             defensoresPiso[j].life -= calcularDano(retadores[index], defensoresPiso[j]);
-            cout << "El daño de " << retadores[index].nombre << " a " << defensoresPiso[j].nombre << " es: " << calcularDano(retadores[index], defensoresPiso[j]) << endl;
+            cout << "El daño de " << retadores[index].name << " a " << defensoresPiso[j].name << " es: " << calcularDano(retadores[index], defensoresPiso[j]) << endl;
             turno = "buenos";
           }
           else
           {
             retadores[index].life -= calcularDano(defensoresPiso[j], retadores[index]);
-            cout << "El daño de " << defensoresPiso[j].nombre << " a " << retadores[index].nombre << " es: " << calcularDano(defensoresPiso[j], retadores[index]) << endl;
+            cout << "El daño de " << defensoresPiso[j].name << " a " << retadores[index].name << " es: " << calcularDano(defensoresPiso[j], retadores[index]) << endl;
             turno = "malos";
           }
           if (defensoresPiso[j].life <= 0)
           {
-            cout << "El defensor " << defensoresPiso[j].nombre << " ha sido derrotado." << endl;
+            cout << "El defensor " << defensoresPiso[j].name << " ha sido derrotado." << endl;
             defensoresPiso[j].life = 0;
             turno = "buenos";
+            // j++;
           }
           if (retadores[index].life <= 0)
           {
-            cout << "El retador " << retadores[index].nombre << " ha sido derrotado." << endl;
+            cout << "El retador " << retadores[index].name << " ha sido derrotado." << endl;
             retadores[index].life = 0;
             turno = "malos";
           }
           cout << "Ronda terminada" << endl;
-          cout << "Vida del Malo " << retadores[index].nombre << ": " << retadores[index].life << endl;
-          cout << "Vida de Bueno " << defensoresPiso[j].nombre << ": " << defensoresPiso[j].life << endl;
+          cout << "Vida del Malo " << retadores[index].name << ": " << retadores[index].life << endl;
+          cout << "Vida de Bueno " << defensoresPiso[j].name << ": " << defensoresPiso[j].life << endl;
+        }
+        if (defensoresPiso[j].life <= 0)
+        {
+          j++;
         }
       }
     }
@@ -293,7 +292,7 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
     //   {
     //     Numer atacante = arrEquipo[k];
     //     float dano = calcularDano(atacante, defensor);
-    //     cout << "El daño de " << atacante.nombre << " a " << defensor.nombre << " es: " << dano << endl;
+    //     cout << "El daño de " << atacante.name << " a " << defensor.name << " es: " << dano << endl;
     //   }
     // }
   }
@@ -315,8 +314,8 @@ int main()
   // cout << "Contenido de Numoris:" << endl;
   // for (int i = 0; i < numNumoris; i++)
   // {
-  //   cout << "ID: " << numoris[i].id << ", Nombre: " << numoris[i].nombre << ", Tipo: " << numoris[i].tipo
-  //        << ", Daño: " << numoris[i].dmg << ", Vida: " << numoris[i].life << endl;
+  //   cout << "ID: " << numoris[i].id << ", Nombre: " << numoris[i].name << ", Tipo: " << numoris[i].type
+  //        << ", Daño: " << numoris[i].damage << ", Vida: " << numoris[i].life << endl;
   // }
   // // Imprimir el contenido de pisos
   // cout << "Contenido de Torres:" << endl;

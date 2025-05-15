@@ -43,7 +43,7 @@ void generarPermutaciones(char arr[], int n, int index)
     // cout << "index == n" << endl;
     // Imprimir la permutación
     imprimirPermutacion(arr, n);
-    cout << "suma: " << calcularSuma(arr, n) << endl;
+    // cout << "suma: " << calcularSuma(arr, n) << endl;
     return;
   }
 
@@ -79,8 +79,8 @@ void generarPermutacionesSumaPar(char arr[], int n, int index)
 
 int main()
 {
-  char arr[MAX_N] = {'a', 'b', 'c'};
-  int n = 3;
+  char arr[MAX_N] = {'a', 'b', 'c', 'e', 'f', 'g'};
+  int n = 6;
 
   // cout << "Ingrese el tamaño del arreglo (N <= " << MAX_N << "): ";
   // cin >> n;
@@ -99,8 +99,8 @@ int main()
   cout << "\nTodas las permutaciones posibles:" << endl;
   generarPermutaciones(arr, n, 0);
 
-  cout << "\nPermutaciones cuya suma sea par:" << endl;
-  generarPermutacionesSumaPar(arr, n, 0);
+  // cout << "\nPermutaciones cuya suma sea par:" << endl;
+  // generarPermutacionesSumaPar(arr, n, 0);
 
   return 0;
 }
