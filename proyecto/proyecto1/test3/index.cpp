@@ -157,20 +157,6 @@ void swap(int &a, int &b)
   b = temp;
 }
 
-// combate
-//  bool combate(string equipo, string piso) {
-//    int idNumber, idEqupo;
-//    for(int i = 0; i < piso.length(); i++) {
-//      if(piso[i] == ' ') {
-//        continue;
-//      }
-//      else {
-//       idNumber = stoi(piso[i]);
-//      }
-//    }
-//    return true;
-//  }
-
 int dividirEnNumeros(string linea, int numeros[])
 {
   int n = linea.length();
@@ -312,6 +298,8 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
 // Generar Equipos
 int combinaciones = 0;
 int ganadores = 0;
+string mejorEquipo = "";
+int valorMejorEquipo = 0;
 void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionados, int equipo[], string torre[], int pisos, Numer numoris[])
 {
   if (seleccionados == 6)
@@ -328,8 +316,47 @@ void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionad
     // cout << salida << endl;
     if (combate(salida, torre, pisos, numoris))
     {
+
       ganadores++;
       cout << "Ganamos con el equipo: " << salida << endl;
+      if (mejorEquipo == "" && valorMejorEquipo == 0)
+      {
+        mejorEquipo = salida;
+        for (int i = 0; i < 6; i++)
+        {
+          valorMejorEquipo += equipo[i];
+        }
+      }
+      else
+      {
+        int valorActual = 0;
+        for (int i = 0; i < 6; i++)
+        {
+          valorActual += equipo[i];
+        }
+        if (valorActual < valorMejorEquipo)
+        {
+          mejorEquipo = salida;
+          valorMejorEquipo = valorActual;
+        }
+        else if (valorActual == valorMejorEquipo)
+        {
+          int arrayMejorEquipo[6];
+          dividirEnNumeros(mejorEquipo, arrayMejorEquipo);
+          string idMejor = "";
+          string idActual = "";
+          for (int i = 0; i < 6; i++)
+          {
+            idMejor = idMejor + to_string(arrayMejorEquipo[i]);
+            idActual = idActual + to_string(equipo[i]);
+          }
+          if (stoi(idActual) < stoi(idMejor))
+          {
+            mejorEquipo = salida;
+            valorMejorEquipo = valorActual;
+          }
+        }
+      }
     }
     return;
   }
@@ -397,5 +424,6 @@ int main()
   generarEquipos(idNumoris, numNumoris, 0, 0, equipo, pisos, numTorres, numoris);
   cout << "Total de combinaciones: " << combinaciones << endl;
   cout << "Total de ganadores: " << ganadores << endl;
+  cout << "Mejor equipo: " << mejorEquipo << endl;
   return 0;
 }
