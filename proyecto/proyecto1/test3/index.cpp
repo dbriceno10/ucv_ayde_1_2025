@@ -3,10 +3,19 @@
 #include <string>
 using namespace std;
 
-const int MAX_NUMORIS = 100; // Máximo número de Numoris en la base de datos
-const int MAX_PISOS = 100;   // Máximo número de pisos en cada torre
-const int MAX_NUMEROS = 10;  // Máximo número de números en una línea
-const int MAX_EQUIPO = 6;    // Tamaño fijo del equipo
+const int MAX_NUMORIS = 1000;
+const int MAX_PISOS = 1000;
+const int MAX_NUMEROS = 10;
+const int MAX_EQUIPO = 6;
+string primerElementoTorre = "";
+float vidaTorre = 0;
+float vidaPiso = 0;
+// int combinaciones = 0;
+// int ganadores = 0;
+string mejorEquipo = "";
+int valorMejorEquipo = 0;
+int mejorBajas = 0;
+float mejorDamage = 0;
 
 struct Elemento
 {
@@ -191,7 +200,7 @@ void obtenerNumoris(Numer newNumoris[], Numer numoris[], int ids[], int max)
     }
     else
     {
-      cout << "No se encontró el Numoris con ID: " << ids[i] << endl;
+      // cout << "No se encontró el Numoris con ID: " << ids[i] << endl;
     }
   }
 }
@@ -209,8 +218,9 @@ int obtenerNumerActo(Numer retadores[], int max)
   return -1; // si no hay miembros en condiciones de combatir
 }
 
-bool combate(string equipo, string torre[], int pisos, Numer numoris[])
+bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &contadorBajas, float &acumDamage)
 {
+  // torre es un array de strings, tiene la forma {"1", "1 1"} se itera por cada posicion la cual es el piso, se lee el string para recuperar los ids y armar a los defensores de cada piso
   int idsRetadores[MAX_EQUIPO];
   int maxRetadores = dividirEnNumeros(equipo, idsRetadores);
   Numer retadores[MAX_EQUIPO];
@@ -252,7 +262,9 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
           }
           else
           {
-            retadores[index].life -= calcularDano(defensoresPiso[j], retadores[index]);
+            const float damage = calcularDano(defensoresPiso[j], retadores[index]);
+            retadores[index].life -= damage;
+            acumDamage += damage;
             // cout << "El daño de " << defensoresPiso[j].name << " a " << retadores[index].name << " es: " << calcularDano(defensoresPiso[j], retadores[index]) << endl;
             turno = "malos";
           }
@@ -268,6 +280,7 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
             // cout << "El retador " << retadores[index].name << " ha sido derrotado." << endl;
             retadores[index].life = 0;
             turno = "malos";
+            contadorBajas++;
           }
           // cout << "Ronda terminada" << endl;
           // cout << "Vida del Malo " << retadores[index].name << ": " << retadores[index].life << endl;
@@ -279,32 +292,16 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[])
         }
       }
     }
-
-    // for (int j = 0; j < cantidad; j++)
-    // {
-    //   int index = buscarNumber(idsPiso[j], numoris, MAX_NUMORIS);
-    //   Numer defensor = numoris[index];
-    //   for (int k = 0; k < MAX_EQUIPO; k++)
-    //   {
-    //     Numer atacante = arrEquipo[k];
-    //     float dano = calcularDano(atacante, defensor);
-    //     cout << "El daño de " << atacante.name << " a " << defensor.name << " es: " << dano << endl;
-    //   }
-    // }
   }
   return true;
 }
 
 // Generar Equipos
-int combinaciones = 0;
-int ganadores = 0;
-string mejorEquipo = "";
-int valorMejorEquipo = 0;
 void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionados, int equipo[], string torre[], int pisos, Numer numoris[])
 {
   if (seleccionados == 6)
   {
-    combinaciones++;
+    // combinaciones++;
     // Construir string de salida
     string salida = "";
     for (int i = 0; i < 6; i++)
@@ -314,56 +311,80 @@ void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionad
         salida += " ";
     }
     // cout << salida << endl;
-    if (combate(salida, torre, pisos, numoris))
+    int contadorBajas = 0;
+    float acumDamage = 0;
+    if (combate(salida, torre, pisos, numoris, contadorBajas, acumDamage))
     {
-
-      ganadores++;
-      cout << "Ganamos con el equipo: " << salida << endl;
-      if (mejorEquipo == "" && valorMejorEquipo == 0)
+      // ganadores++;
+      // cout << "Ganamos con el equipo: " << salida << endl;
+      if (mejorEquipo == "" && valorMejorEquipo == 0 && mejorBajas == 0 && mejorDamage == 0)
       {
         mejorEquipo = salida;
         for (int i = 0; i < 6; i++)
         {
           valorMejorEquipo += equipo[i];
         }
+        mejorBajas = contadorBajas;
+        mejorDamage = acumDamage;
       }
       else
       {
-        int valorActual = 0;
-        for (int i = 0; i < 6; i++)
-        {
-          valorActual += equipo[i];
-        }
-        if (valorActual < valorMejorEquipo)
+        if (contadorBajas < mejorBajas && acumDamage < mejorDamage)
         {
           mejorEquipo = salida;
-          valorMejorEquipo = valorActual;
-        }
-        else if (valorActual == valorMejorEquipo)
-        {
-          int arrayMejorEquipo[6];
-          dividirEnNumeros(mejorEquipo, arrayMejorEquipo);
-          string idMejor = "";
-          string idActual = "";
+          mejorBajas = contadorBajas;
+          mejorDamage = acumDamage;
+          int valorActual = 0;
           for (int i = 0; i < 6; i++)
           {
-            idMejor = idMejor + to_string(arrayMejorEquipo[i]);
-            idActual = idActual + to_string(equipo[i]);
+            valorActual += equipo[i];
           }
-          if (stoi(idActual) < stoi(idMejor))
+          valorMejorEquipo = valorActual;
+        }
+        else if (contadorBajas == mejorBajas && acumDamage < mejorDamage)
+        {
+          int valorActual = 0;
+          for (int i = 0; i < 6; i++)
+          {
+            valorActual += equipo[i];
+          }
+          if (valorActual < valorMejorEquipo)
           {
             mejorEquipo = salida;
             valorMejorEquipo = valorActual;
+            mejorBajas = contadorBajas;
+            mejorDamage = acumDamage;
+          }
+          else if (valorActual == valorMejorEquipo)
+          {
+            int arrayMejorEquipo[6];
+            dividirEnNumeros(mejorEquipo, arrayMejorEquipo);
+            string idMejor = "";
+            string idActual = "";
+            for (int i = 0; i < 6; i++)
+            {
+              idMejor = idMejor + to_string(arrayMejorEquipo[i]);
+              idActual = idActual + to_string(equipo[i]);
+            }
+            if (stoi(idActual) < stoi(idMejor))
+            {
+              mejorEquipo = salida;
+              valorMejorEquipo = valorActual;
+              mejorBajas = contadorBajas;
+              mejorDamage = acumDamage;
+            }
           }
         }
       }
     }
+    // salimos del nivel actual
     return;
   }
   if (index >= numNumoris)
+  {
+    // caso base, ya armamos las combinaciones
     return;
-
-  // Para cada posición desde idx hasta n-1, intercambia y selecciona
+  }
   for (int i = index; i < numNumoris; i++)
   {
     swap(idsNumoris[index], idsNumoris[i]);
@@ -378,52 +399,17 @@ int main()
   Numer numoris[MAX_NUMORIS];
   int idNumoris[MAX_NUMORIS];
   string pisos[MAX_PISOS];
-  int numNumoris = leerNumorisDB("NumorisDB2.in", numoris, idNumoris);
-  cout << "Número de Numoris leídos: " << numNumoris << endl;
-  cout << "Numero de archivo a leer" << endl;
+  int numNumoris = leerNumorisDB("NumorisDB.in", numoris, idNumoris);
+  // cout << "Número de Numoris leídos: " << numNumoris << endl;
+  // cout << "Numero de archivo a leer" << endl;
   int torre;
   cin >> torre;
   int numTorres = leerTorre(torre, pisos);
-  // cout << "Número de Torres leídas: " << numTorres << endl;
-  // // Imprimir el contenido de numoris
-  // cout << "Contenido de Numoris:" << endl;
-  // for (int i = 0; i < numNumoris; i++)
-  // {
-  //   cout << "ID: " << numoris[i].id << ", Nombre: " << numoris[i].name << ", Tipo: " << numoris[i].type
-  //        << ", Daño: " << numoris[i].damage << ", Vida: " << numoris[i].life << endl;
-  // }
-  // // Imprimir el contenido de pisos
-  // cout << "Contenido de Torres:" << endl;
-  // for (int i = 0; i < numTorres; i++)
-  // {
-  //   // cout << "Piso " << i + 1 << ": " << pisos[i] << endl;
-  //   // for (int j = 0; j < pisos[i].length(); j++)
-  //   // {
-  //   //   if (pisos[i][j] == ' ')
-  //   //   {
-  //   //     continue;
-  //   //   }
-  //   //   else
-  //   //   {
-  //   //     int contador = 0;
-  //   //     cout << "Piso " << i + 1 << ": " << pisos[i][j] << endl;
-  //   //   }
-  //   // }
-  //   int numeros[10];
-  //   int cantidad = dividirEnNumeros(pisos[i], numeros);
-  //   cout << "Piso " << i + 1 << ": ";
-  //   for (int j = 0; j < cantidad; j++)
-  //   {
-  //     cout << numeros[j] << " ";
-  //   }
-  //   cout << endl;
-  // }
-  // cout << (combate(generarEquipo(), pisos, numTorres, numoris) ? "Ganamos" : "Perdimos") << endl;
-  // generarEquipo(idNumoris, numNumoris, 0);
-  int equipo[6];
+  int equipo[MAX_EQUIPO];
   generarEquipos(idNumoris, numNumoris, 0, 0, equipo, pisos, numTorres, numoris);
-  cout << "Total de combinaciones: " << combinaciones << endl;
-  cout << "Total de ganadores: " << ganadores << endl;
-  cout << "Mejor equipo: " << mejorEquipo << endl;
+  // cout << "Total de combinaciones: " << combinaciones << endl;
+  // cout << "Total de ganadores: " << ganadores << endl;
+  // cout << "Mejor equipo: " << mejorEquipo << endl;
+  cout << mejorEquipo << endl;
   return 0;
 }
