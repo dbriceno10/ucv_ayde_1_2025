@@ -3,6 +3,8 @@
 #include <string>
 using namespace std;
 
+//Daniel Briceno C1 AyD
+
 const int MAX_NUMORIS = 1000;
 const int MAX_PISOS = 1000;
 const int MAX_NUMEROS = 10;
