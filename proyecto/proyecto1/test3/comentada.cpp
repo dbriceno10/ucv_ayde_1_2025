@@ -241,6 +241,7 @@ bool EsApto(Numer retadores[], Numer numoris[], int ids[], int max)
 
 bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &contadorBajas, float &acumDamage)
 {
+  cout << "entrando a combate" << endl;
   // torre es un array de strings, tiene la forma {"1", "1 1"} se itera por cada posicion la cual es el piso, se lee el string para recuperar los ids y armar a los defensores de cada piso
   int idsRetadores[MAX_EQUIPO];
   int maxRetadores = dividirEnNumeros(equipo, idsRetadores);
@@ -249,8 +250,8 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &con
   obtenerNumoris(retadores, numoris, idsRetadores, maxRetadores);
 
   // pequeña poda para verificar si el equipo es apto para recorrer el piso
-  if (EsApto(retadores, numoris, idsRetadores, maxRetadores))
-  {
+  // if (EsApto(retadores, numoris, idsRetadores, maxRetadores))
+  // {
     // recorrer los pisos
     for (int i = 0; i < pisos; i++)
     {
@@ -262,10 +263,10 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &con
       // cout <<"idsPiso: " << torre[i] << endl;
       // iteramos en el piso
       string turno = "malos";
-      // cout << "Piso " << i + 1 << endl;
+      cout << "Piso " << i + 1 << endl;
       for (int j = 0; j < cantidad;)
       {
-        // cout << "Defensor: " << defensoresPiso[j].name << endl;
+        cout << "Defensor: " << defensoresPiso[j].name << endl;
         // obtenemos al malo
         int index = obtenerNumerActo(retadores, maxRetadores);
         if (index == -1)
@@ -275,14 +276,14 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &con
         else
         {
           // combate en piso
-          // cout << "El retador " << retadores[index].name << "(" << retadores[index].life << ")" << " estÃ¡ combatiendo en contra del defensor " << defensoresPiso[j].name << "(" << defensoresPiso[j].life << ")" << endl;
+          cout << "El retador " << retadores[index].name << "(" << retadores[index].life << ")" << " esta¡ combatiendo en contra del defensor " << defensoresPiso[j].name << "(" << defensoresPiso[j].life << ")" << endl;
 
           while (retadores[index].life > 0 && defensoresPiso[j].life > 0)
           {
             if (turno == "malos")
             {
               defensoresPiso[j].life -= calcularDano(retadores[index], defensoresPiso[j]);
-              // cout << "El daÃ±o de " << retadores[index].name << " a " << defensoresPiso[j].name << " es: " << calcularDano(retadores[index], defensoresPiso[j]) << endl;
+              cout << "El dano de " << retadores[index].name << " a " << defensoresPiso[j].name << " es: " << calcularDano(retadores[index], defensoresPiso[j]) << endl;
               turno = "buenos";
             }
             else
@@ -290,26 +291,27 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &con
               const float damage = calcularDano(defensoresPiso[j], retadores[index]);
               retadores[index].life -= damage;
               acumDamage += damage;
-              // cout << "El daÃ±o de " << defensoresPiso[j].name << " a " << retadores[index].name << " es: " << calcularDano(defensoresPiso[j], retadores[index]) << endl;
+              cout << "El danoo de " << defensoresPiso[j].name << " a " << retadores[index].name << " es: " << calcularDano(defensoresPiso[j], retadores[index]) << endl;
               turno = "malos";
             }
             if (defensoresPiso[j].life <= 0)
             {
-              // cout << "El defensor " << defensoresPiso[j].name << " ha sido derrotado." << endl;
+              cout << "El defensor " << defensoresPiso[j].name << " ha sido derrotado." << endl;
               defensoresPiso[j].life = 0;
               turno = "buenos";
               // j++;
             }
             if (retadores[index].life <= 0)
             {
-              // cout << "El retador " << retadores[index].name << " ha sido derrotado." << endl;
+              cout << "El retador " << retadores[index].name << " ha sido derrotado." << endl;
               retadores[index].life = 0;
               turno = "malos";
               contadorBajas++;
+              cout << "Quedan " << 6 - contadorBajas << " retadores vivos." << endl;
             }
-            // cout << "Ronda terminada" << endl;
-            // cout << "Vida del Malo " << retadores[index].name << ": " << retadores[index].life << endl;
-            // cout << "Vida de Bueno " << defensoresPiso[j].name << ": " << defensoresPiso[j].life << endl;
+            cout << "Ronda terminada" << endl;
+            cout << "Vida del Malo " << retadores[index].name << ": " << retadores[index].life << endl;
+            cout << "Vida de Bueno " << defensoresPiso[j].name << ": " << defensoresPiso[j].life << endl;
           }
           if (defensoresPiso[j].life <= 0)
           {
@@ -318,7 +320,7 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &con
         }
       }
     }
-  }
+  // }
   return true;
 }
 
@@ -425,7 +427,7 @@ int main()
   Numer numoris[MAX_NUMORIS];
   int idNumoris[MAX_NUMORIS];
   string pisos[MAX_PISOS];
-  int numNumoris = leerNumorisDB("NumorisDB.in", numoris, idNumoris);
+  int numNumoris = leerNumorisDB("NumorisDB2.in", numoris, idNumoris);
   if (numNumoris == -1)
   {
     return 0;
@@ -477,18 +479,26 @@ int main()
   // generarEquipo(idNumoris, numNumoris, 0);
   int equipo[MAX_EQUIPO];
 
-  generarEquipos(idNumoris, numNumoris, 0, 0, equipo, pisos, numTorres, numoris);
+  // generarEquipos(idNumoris, numNumoris, 0, 0, equipo, pisos, numTorres, numoris);
   // cout << "Total de combinaciones: " << combinaciones << endl;
   // cout << "Total de ganadores: " << ganadores << endl;
   // cout << "Mejor equipo: " << mejorEquipo << endl;
   // cout << mejorEquipo << endl;
-  if (mejorEquipo != "")
+  if(combate("1 2 3 4 5 6", pisos, numTorres, numoris, mejorBajas, mejorDamage))
   {
-    cout << mejorEquipo << endl;
+    cout << "Ganamos" << endl;
   }
   else
   {
-    cout << 0 << endl;
+    cout << "Perdimos" << endl;
   }
+  // if (mejorEquipo != "")
+  // {
+  //   cout << mejorEquipo << endl;
+  // }
+  // else
+  // {
+  //   cout << 0 << endl;
+  // }
   return 0;
 }

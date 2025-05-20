@@ -247,8 +247,8 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &con
   // armar equipo
   obtenerNumoris(retadores, numoris, idsRetadores, maxRetadores);
   // pequena poda para verificar si el equipo es apto para recorrer el piso
-  if (EsApto(retadores, numoris, idsRetadores, maxRetadores))
-  {
+  // if (EsApto(retadores, numoris, idsRetadores, maxRetadores))
+  // {
     // recorrer los pisos
     for (int i = 0; i < pisos; i++)
     {
@@ -302,7 +302,7 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &con
           }
         }
       }
-    }
+    // }
   }
   return true;
 }
