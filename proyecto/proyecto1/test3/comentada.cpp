@@ -427,7 +427,7 @@ int main()
   Numer numoris[MAX_NUMORIS];
   int idNumoris[MAX_NUMORIS];
   string pisos[MAX_PISOS];
-  int numNumoris = leerNumorisDB("NumorisDB2.in", numoris, idNumoris);
+  int numNumoris = leerNumorisDB("NumorisDB5.in", numoris, idNumoris);
   if (numNumoris == -1)
   {
     return 0;

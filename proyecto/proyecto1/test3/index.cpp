@@ -247,62 +247,63 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &con
   // armar equipo
   obtenerNumoris(retadores, numoris, idsRetadores, maxRetadores);
   // pequena poda para verificar si el equipo es apto para recorrer el piso
-  // if (EsApto(retadores, numoris, idsRetadores, maxRetadores))
-  // {
-    // recorrer los pisos
-    for (int i = 0; i < pisos; i++)
+  if (EsApto(retadores, numoris, idsRetadores, maxRetadores) == false)
+  {
+    return false;
+  }
+  // recorrer los pisos
+  for (int i = 0; i < pisos; i++)
+  {
+    int idsPiso[MAX_NUMEROS];
+    int cantidad = dividirEnNumeros(torre[i], idsPiso);
+    Numer defensoresPiso[MAX_NUMEROS];
+    // armar defensores
+    obtenerNumoris(defensoresPiso, numoris, idsPiso, cantidad);
+    // iteramos en el piso, los malos empiezan en cada piso
+    string turno = "malos";
+    for (int j = 0; j < cantidad;)
     {
-      int idsPiso[MAX_NUMEROS];
-      int cantidad = dividirEnNumeros(torre[i], idsPiso);
-      Numer defensoresPiso[MAX_NUMEROS];
-      // armar defensores
-      obtenerNumoris(defensoresPiso, numoris, idsPiso, cantidad);
-      // iteramos en el piso, los malos empiezan en cada piso
-      string turno = "malos";
-      for (int j = 0; j < cantidad;)
+      // obtenemos a los retadores
+      int index = obtenerNumerActo(retadores, maxRetadores);
+      if (index == -1)
       {
-        // obtenemos a los retadores
-        int index = obtenerNumerActo(retadores, maxRetadores);
-        if (index == -1)
+        return false;
+      }
+      else
+      {
+        // combate en piso
+        while (retadores[index].life > 0 && defensoresPiso[j].life > 0)
         {
-          return false;
-        }
-        else
-        {
-          // combate en piso
-          while (retadores[index].life > 0 && defensoresPiso[j].life > 0)
+          if (turno == "malos")
           {
-            if (turno == "malos")
-            {
-              defensoresPiso[j].life -= calcularDano(retadores[index], defensoresPiso[j]);
-              turno = "buenos";
-            }
-            else
-            {
-              const float damage = calcularDano(defensoresPiso[j], retadores[index]);
-              retadores[index].life -= damage;
-              acumDamage += damage;
-              turno = "malos";
-            }
-            if (defensoresPiso[j].life <= 0)
-            {
-              defensoresPiso[j].life = 0;
-              turno = "buenos";
-            }
-            if (retadores[index].life <= 0)
-            {
-              retadores[index].life = 0;
-              turno = "malos";
-              contadorBajas++;
-            }
+            defensoresPiso[j].life -= calcularDano(retadores[index], defensoresPiso[j]);
+            turno = "buenos";
+          }
+          else
+          {
+            const float damage = calcularDano(defensoresPiso[j], retadores[index]);
+            retadores[index].life -= damage;
+            acumDamage += damage;
+            turno = "malos";
           }
           if (defensoresPiso[j].life <= 0)
           {
-            j++;
+            defensoresPiso[j].life = 0;
+            turno = "buenos";
+          }
+          if (retadores[index].life <= 0)
+          {
+            retadores[index].life = 0;
+            turno = "malos";
+            contadorBajas++;
           }
         }
+        if (defensoresPiso[j].life <= 0)
+        {
+          j++;
+        }
       }
-    // }
+    }
   }
   return true;
 }
@@ -338,7 +339,7 @@ void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionad
       else
       {
         // validamos si el nuevo ganador supera al mejor
-        if (contadorBajas < mejorBajas && acumDamage < mejorDamage)
+        if (contadorBajas < mejorBajas)
         {
           mejorEquipo = salida;
           mejorBajas = contadorBajas;
@@ -350,41 +351,55 @@ void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionad
           }
           valorMejorEquipo = valorActual;
         }
-        // si el ganador actual empata al anterior
-        else if (contadorBajas == mejorBajas && acumDamage == mejorDamage)
+        else if (contadorBajas == mejorBajas)
         {
-          int valorActual = 0;
-          for (int i = 0; i < 6; i++)
-          {
-            valorActual += equipo[i];
-          }
-          // condicion desempate 1
-          if (valorActual < valorMejorEquipo)
+          if (acumDamage < mejorDamage)
           {
             mejorEquipo = salida;
-            valorMejorEquipo = valorActual;
             mejorBajas = contadorBajas;
             mejorDamage = acumDamage;
-          }
-          // condicion desempate 2
-          else if (valorActual == valorMejorEquipo)
-          {
-            int arrayMejorEquipo[6];
-            dividirEnNumeros(mejorEquipo, arrayMejorEquipo);
-            string idMejor = "";
-            string idActual = "";
+            int valorActual = 0;
             for (int i = 0; i < 6; i++)
             {
-              idMejor = idMejor + to_string(arrayMejorEquipo[i]);
-              idActual = idActual + to_string(equipo[i]);
+              valorActual += equipo[i];
             }
-            // evaluar el numero formado por los ids
-            if (stoi(idActual) < stoi(idMejor))
+            valorMejorEquipo = valorActual;
+          }
+          else if (acumDamage == mejorDamage)
+          {
+            int valorActual = 0;
+            for (int i = 0; i < 6; i++)
+            {
+              valorActual += equipo[i];
+            }
+            // condicion desempate 1
+            if (valorActual < valorMejorEquipo)
             {
               mejorEquipo = salida;
               valorMejorEquipo = valorActual;
               mejorBajas = contadorBajas;
               mejorDamage = acumDamage;
+            }
+            // condicion desempate 2
+            else if (valorActual == valorMejorEquipo)
+            {
+              int arrayMejorEquipo[6];
+              dividirEnNumeros(mejorEquipo, arrayMejorEquipo);
+              string idMejor = "";
+              string idActual = "";
+              for (int i = 0; i < 6; i++)
+              {
+                idMejor = idMejor + to_string(arrayMejorEquipo[i]);
+                idActual = idActual + to_string(equipo[i]);
+              }
+              // evaluar el numero formado por los ids
+              if (stoi(idActual) < stoi(idMejor))
+              {
+                mejorEquipo = salida;
+                valorMejorEquipo = valorActual;
+                mejorBajas = contadorBajas;
+                mejorDamage = acumDamage;
+              }
             }
           }
         }
