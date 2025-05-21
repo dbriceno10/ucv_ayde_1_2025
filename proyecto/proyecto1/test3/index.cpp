@@ -227,7 +227,7 @@ bool EsApto(Numer retadores[], Numer numoris[], int ids[], int max)
     sumaRetadores += retadores[i].life;
   }
 
-  int comparador = numoris[1].life + numoris[2].life + numoris[3].life + numoris[4].life + numoris[5].life + numoris[6].life;
+  int comparador = numoris[0].life + numoris[1].life + numoris[2].life + numoris[3].life + numoris[4].life + numoris[5].life;
 
   if (sumaRetadores >= comparador)
   {
@@ -311,11 +311,11 @@ bool combate(string equipo, string torre[], int pisos, Numer numoris[], int &con
 // Generar Equipos
 void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionados, int equipo[], string torre[], int pisos, Numer numoris[])
 {
-  if (seleccionados == 6)
+  if (seleccionados == MAX_EQUIPO)
   {
     // Construir string del equipo
     string salida = "";
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < MAX_EQUIPO; i++)
     {
       salida += to_string(equipo[i]);
       if (i < 5)
@@ -329,7 +329,7 @@ void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionad
       if (mejorEquipo == "" && valorMejorEquipo == 0 && mejorBajas == 0 && mejorDamage == 0)
       {
         mejorEquipo = salida;
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < MAX_EQUIPO; i++)
         {
           valorMejorEquipo += equipo[i];
         }
@@ -345,7 +345,7 @@ void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionad
           mejorBajas = contadorBajas;
           mejorDamage = acumDamage;
           int valorActual = 0;
-          for (int i = 0; i < 6; i++)
+          for (int i = 0; i < MAX_EQUIPO; i++)
           {
             valorActual += equipo[i];
           }
@@ -359,7 +359,7 @@ void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionad
             mejorBajas = contadorBajas;
             mejorDamage = acumDamage;
             int valorActual = 0;
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < MAX_EQUIPO; i++)
             {
               valorActual += equipo[i];
             }
@@ -368,7 +368,7 @@ void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionad
           else if (acumDamage == mejorDamage)
           {
             int valorActual = 0;
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < MAX_EQUIPO; i++)
             {
               valorActual += equipo[i];
             }
@@ -383,11 +383,11 @@ void generarEquipos(int idsNumoris[], int numNumoris, int index, int seleccionad
             // condicion desempate 2
             else if (valorActual == valorMejorEquipo)
             {
-              int arrayMejorEquipo[6];
+              int arrayMejorEquipo[MAX_EQUIPO];
               dividirEnNumeros(mejorEquipo, arrayMejorEquipo);
               string idMejor = "";
               string idActual = "";
-              for (int i = 0; i < 6; i++)
+              for (int i = 0; i < MAX_EQUIPO; i++)
               {
                 idMejor = idMejor + to_string(arrayMejorEquipo[i]);
                 idActual = idActual + to_string(equipo[i]);
