@@ -30,8 +30,8 @@ void printMatriz(char **M, int n)
     cout << "|";
     for (int j = 0; j < n; j++)
     {
-      cout << "(" << i << "," << j << "): " << " " << M[i][j] << " ";
-      // cout << " " << M[i][j] << " ";
+      // cout << "(" << i << "," << j << "): " << " " << M[i][j] << " ";
+      cout << " " << M[i][j] << " ";
     }
     cout << "|" << endl;
   }
@@ -152,21 +152,15 @@ int readMaze(string filename, char **&matriz)
 bool goRowByColumn(char **&matriz, bool **&visited, int n, int row, int col, int &calls, int &steps, bool &isExit)
 {
   printMatrizActual(matriz, n, col, row);
-  // cout << "estamos en la fila " << row << ", columna " << col << endl;
-  // cout << "estamos en: " << "(" << row << "," << col << ")" << endl;
-
   calls++;
-  if (isLimt(row, col, n))
-  {
-    cout << "isLimt: " << isLimt(row, col, n) << endl;
-    cout << "No se puede avanzar a la fila " << row << ", columna " << col << endl;
-
-    // visited[row][col] = false;
-    return false;
-  }
+  // if (isLimt(row, col, n))
+  // {
+  //   cout << "isLimt: " << isLimt(row, col, n) << endl;
+  //   cout << "No se puede avanzar a la fila " << row << ", columna " << col << endl;
+  //   return false;
+  // }
   if (isExit)
   {
-    // encontramos la salida
     return true;
   }
   if (isExitFound(matriz, row, col))
@@ -175,116 +169,31 @@ bool goRowByColumn(char **&matriz, bool **&visited, int n, int row, int col, int
     cout << "Salida encontrada en la fila " << row << ", columna " << col << endl;
     return true;
   }
-  if (isWall(matriz, row, col))
-  {
-    cout << "isWall: " << isWall(matriz, row, col) << endl;
-    cout << "No se puede avanzar a la fila " << row << ", columna " << col << endl;
 
-    // visited[row][col] = false;
-    return false;
-  }
-
-  // if (col >= n )
-  // {
-  //   // no hay salida
-  //   return false;
-  // }
-  // contamos esta llamada
-  // for (int i = row; i < n; i++)
-  // {
-  //   for (int j = col; j < n; j++)
-  //   {
-  //     // cout << "(" << i << "," << j << "): " << " " << matriz[i][j] << " ";
-  //     cout << "(" << i << "," << j << "): " << endl;
-
-  //     // if (!visited[i][j])
-  //     // {
-  //     // visited[i][j] = true;
-  //     steps++;
-  //     if (goRowByColumn(matriz, visited, n, i, j, calls, steps, isExit))
-  //     {
-  //       return true;
-  //     }
-  //     // visited[i][j] = false;
-  //     // }
-  //   }
-  // }
-  if (visited[row][col])
-  {
-    cout << "visited: " << visited[row][col] << endl;
-    cout << "No se puede avanzar a la fila " << row << ", columna " << col << endl;
-    return false;
-  }
-  // if (row != 0 && col != 0)
-  // {
-    visited[row][col] = true;
-  // }
+  visited[row][col] = true;
   steps++;
-
-  // Prioridad: filas (derecha), luego columnas (abajo)
-  // Derecha
-  if (goRowByColumn(matriz, visited, n, row, col + 1, calls, steps, isExit))
+  // derecha
+  if (!isLimt(row, col + 1, n) && !isWall(matriz, row, col + 1) && !visited[row][col + 1])
   {
-    return true;
+    goRowByColumn(matriz, visited, n, row, col + 1, calls, steps, isExit);
   }
-  // Izquierda
-  if (goRowByColumn(matriz, visited, n, row, col - 1, calls, steps, isExit))
+  // izquierda
+  if (!isLimt(row, col - 1, n) && !isWall(matriz, row, col - 1) && !visited[row][col - 1])
   {
-    return true;
+    goRowByColumn(matriz, visited, n, row, col - 1, calls, steps, isExit);
   }
-  // Arriba
-  if (goRowByColumn(matriz, visited, n, row - 1, col, calls, steps, isExit))
+  // arriba
+  if (!isLimt(row + 1, col, n) && !isWall(matriz, row + 1, col) && !visited[row + 1][col])
   {
-    return true;
+    goRowByColumn(matriz, visited, n, row + 1, col, calls, steps, isExit);
   }
-  // Abajo
-  if (goRowByColumn(matriz, visited, n, row + 1, col, calls, steps, isExit))
+  // abajo
+  if (!isLimt(row - 1, col, n) && !isWall(matriz, row - 1, col) && !visited[row - 1][col])
   {
-    return true;
+    goRowByColumn(matriz, visited, n, row - 1, col, calls, steps, isExit);
   }
-
-  // Si quieres marcar retroceso, puedes descomentar:
-  // visited[row][col] = false;
-  steps--;
+  visited[row][col] = false;
   return false;
-  // priorizar moverse en filas
-  // if (!isLimt(row + 1, col, n) && !isWall(matriz, row + 1, col) && !visited[row + 1][col])
-  // {
-  //   if(isExitFound(matriz, row + 1, col))
-  //   {
-  //     isExit = true;
-  //     cout << "Salida encontrada en la fila " << row + 1 << ", columna " << col << endl;
-  //     return;
-  //   }
-  // }
-  // if(!isLimt(row + 1, col, n) && !isWall(matriz, row + 1, col) && !visited[row + 1][col])
-  // {
-  //   visited[row + 1][col] = true;
-  //   steps++;
-  //   calls++;
-  //   cout << "Llamada #" << calls << ": Moverse a la fila " << row + 1 << ", columna " << col << endl;
-  //   if (isExit(matriz, row + 1, col))
-  //   {
-  //     isExit = true;
-  //     cout << "Salida encontrada en la fila " << row + 1 << ", columna " << col << endl;
-  //     return;
-  //   }
-  //   goRowByColumn(matriz, visited, n, row + 1, col, calls, steps, isExit);
-  // }
-  // else if (!isLimt(row, col + 1, n) && !isWall(matriz, row, col + 1) && !visited[row][col + 1])
-  // {
-  //   visited[row][col + 1] = true;
-  //   steps++;
-  //   calls++;
-  //   cout << "Llamada #" << calls << ": Moverse a la fila " << row << ", columna " << col + 1 << endl;
-  //   if (isExit(matriz, row, col + 1))
-  //   {
-  //     isExit = true;
-  //     cout << "Salida encontrada en la fila " << row << ", columna " << col + 1 << endl;
-  //     return;
-  //   }
-  //   goRowByColumn(matriz, visited, n, row, col + 1, calls, steps, isExit);
-  // }
 }
 
 int main()
