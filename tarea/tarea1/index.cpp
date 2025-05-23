@@ -6,7 +6,7 @@
 using namespace std;
 using namespace chrono;
 
-const char wall = '#', trail = '.', exitChar = 'S';
+const char wall = '#', trail = '.', exitChar = 'S', entranceChar = 'E';
 
 bool isLimt(int row, int col, int n)
 {
