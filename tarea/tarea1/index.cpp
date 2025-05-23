@@ -1,15 +1,15 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <chrono>
 
 using namespace std;
+using namespace chrono;
 
-const char wall = '#', trail = '.', exitChar = 'S', entrance = 'E';
-int actualRow = 0, actualCol = 0;
+const char wall = '#', trail = '.', exitChar = 'S';
 
 bool isLimt(int row, int col, int n)
 {
-  // return (row >= 0 && row < n && col >= 0 && col < n);
   return (row < 0 || row >= n || col < 0 || col >= n);
 }
 
@@ -38,6 +38,7 @@ void printMatriz(char **M, int n)
   cout << endl;
 }
 
+// printMatrizActual si se usa permite ver el recorrido, indica la posición actual i j del recorrido
 void printMatrizActual(char **M, int n, int col, int row)
 {
   for (int i = 0; i < n; i++)
@@ -45,8 +46,6 @@ void printMatrizActual(char **M, int n, int col, int row)
     cout << "|";
     for (int j = 0; j < n; j++)
     {
-      // cout << "(" << i << "," << j << "): " << " " << M[i][j] << " ";
-      // cout << " " << M[i][j] << " ";
       if (i == row && j == col)
       {
         cout << "(" << i << "," << j << "): " << " " << M[i][j] << " ";
@@ -55,21 +54,6 @@ void printMatrizActual(char **M, int n, int col, int row)
       {
         cout << " " << M[i][j] << " ";
       }
-    }
-    cout << "|" << endl;
-  }
-  cout << endl;
-}
-
-void printBoolMatriz(bool **M, int n)
-{
-  for (int i = 0; i < n; i++)
-  {
-    cout << "|";
-    for (int j = 0; j < n; j++)
-    {
-      cout << "(" << i << "," << j << "): " << " " << M[i][j] << " ";
-      // cout << " " << M[i][j] << " ";
     }
     cout << "|" << endl;
   }
@@ -150,7 +134,7 @@ int readMaze(string filename, char **&matriz)
 // backtracking
 bool goRowByColumn(char **&matriz, bool **&visited, int n, int row, int col, int &calls, int &steps, bool &isExit)
 {
-  printMatrizActual(matriz, n, col, row);
+  // printMatrizActual(matriz, n, col, row);
   if (isExit)
   {
     return true;
@@ -159,7 +143,7 @@ bool goRowByColumn(char **&matriz, bool **&visited, int n, int row, int col, int
   if (isExitFound(matriz, row, col))
   {
     isExit = true;
-    cout << "Salida encontrada en la fila " << row << ", columna " << col << endl;
+    // cout << "Salida encontrada en la fila " << row << ", columna " << col << endl;
     return true;
   }
 
@@ -202,28 +186,466 @@ bool goRowByColumn(char **&matriz, bool **&visited, int n, int row, int col, int
   return false;
 }
 
+bool goColumnByRow(char **&matriz, bool **&visited, int n, int row, int col, int &calls, int &steps, bool &isExit)
+{
+  // printMatrizActual(matriz, n, col, row);
+  if (isExit)
+  {
+    return true;
+  }
+  calls++;
+  if (isExitFound(matriz, row, col))
+  {
+    isExit = true;
+    // cout << "Salida encontrada en la fila " << row << ", columna " << col << endl;
+    return true;
+  }
+
+  visited[row][col] = true;
+  steps++;
+  // arriba
+  if (!isLimt(row + 1, col, n) && !isWall(matriz, row + 1, col) && !visited[row + 1][col])
+  {
+    if (goColumnByRow(matriz, visited, n, row + 1, col, calls, steps, isExit))
+    {
+      return true;
+    }
+  }
+  // abajo
+  if (!isLimt(row - 1, col, n) && !isWall(matriz, row - 1, col) && !visited[row - 1][col])
+  {
+    if (goColumnByRow(matriz, visited, n, row - 1, col, calls, steps, isExit))
+    {
+      return true;
+    }
+  }
+  // derecha
+  if (!isLimt(row, col + 1, n) && !isWall(matriz, row, col + 1) && !visited[row][col + 1])
+  {
+    if (goColumnByRow(matriz, visited, n, row, col + 1, calls, steps, isExit))
+    {
+      return true;
+    }
+  }
+  // izquierda
+  if (!isLimt(row, col - 1, n) && !isWall(matriz, row, col - 1) && !visited[row][col - 1])
+  {
+    if (goColumnByRow(matriz, visited, n, row, col - 1, calls, steps, isExit))
+    {
+      return true;
+    }
+  }
+  visited[row][col] = false;
+  steps--;
+  return false;
+}
+
 int main()
 {
-  char **maze10x10;
-  bool **visited10x10;
-  int calls = 0, steps = 0;
+  const int K10 = 10;
+  const int K100 = 100;
+  char **maze;
+  bool **visited;
+  int callsFxC = 0, stepsFxC = 0, callsCxF = 0, stepsCxF = 0;
   bool isExit = false;
-  int D10x10 = readMaze("maze50x50.txt", maze10x10);
-  if (D10x10 == -1)
+  int dimention = readMaze("maze10x10.txt", maze);
+  if (dimention == -1)
   {
     return 0;
   }
   else
   {
-    printMatriz(maze10x10, D10x10);
-    initializeBoolMatriz(visited10x10, D10x10);
+    cout << "Laberinto 10x10" << endl;
+    printMatriz(maze, dimention);
+    initializeBoolMatriz(visited, dimention);
   }
-  // printBoolMatriz(visited10x10, D10x10);
-  goRowByColumn(maze10x10, visited10x10, D10x10, 0, 0, calls, steps, isExit);
-  // deleteMatriz(maze10x10, D10x10);
-  // deleteBoolMatriz(visited10x10, D10x10);
-  // printBoolMatriz(visited10x10, D10x10);
-  cout << "Llamadas: " << calls << endl;
-  cout << "Pasos: " << steps << endl;
+  cout << "Recorrido FilasxColumnas 1 vez" << endl;
+  auto startFxC = high_resolution_clock::now();
+  goRowByColumn(maze, visited, dimention, 0, 0, callsFxC, stepsFxC, isExit);
+  auto stopFxC = high_resolution_clock::now();
+  duration<float, milli> durationFxC = stopFxC - startFxC;
+  double timeFxC = durationFxC.count();
+  cout << "Tiempo de ejecución: " << timeFxC << " ms" << endl;
+  cout << "Llamadas: " << callsFxC << endl;
+  cout << "Pasos: " << stepsFxC << endl;
+  deleteBoolMatriz(visited, dimention);
+  initializeBoolMatriz(visited, dimention);
+  isExit = false;
+  auto startCxF = high_resolution_clock::now();
+  cout << "Recorrido ColumnasxFilas 1 vez" << endl;
+  goColumnByRow(maze, visited, dimention, 0, 0, callsCxF, stepsCxF, isExit);
+  auto stopCxF = high_resolution_clock::now();
+  duration<float, milli> durationCxF = stopCxF - startCxF;
+  double timeCxF = durationCxF.count();
+  cout << "Tiempo de ejecución: " << timeCxF << " ms" << endl;
+  cout << "Llamadas: " << callsCxF << endl;
+  cout << "Pasos: " << stepsCxF << endl;
+  deleteBoolMatriz(visited, dimention);
+  cout << "Laberinto 10x10 ejecutado 1 vez" << endl;
+  cout << "Recorrido FilasxColumnas vs Recorrido ColumnasxFilas" << endl;
+  cout << "Llamadas: " << callsFxC << " vs " << callsCxF << endl;
+  cout << "Pasos: " << stepsFxC << " vs " << stepsCxF << endl;
+  cout << "Tiempo: " << timeFxC << " ms vs " << timeCxF << " ms" << endl;
+  isExit = false;
+  callsFxC = 0, stepsFxC = 0;
+  callsCxF = 0, stepsCxF = 0;
+  initializeBoolMatriz(visited, dimention);
+  // metodo FxC matriz 10x10 ejecutado 10 veces
+  cout << "Laberinto 10x10 ejecutado 10 veces" << endl;
+  startFxC = high_resolution_clock::now();
+  for (int i = 0; i < K10; i++)
+  {
+    goRowByColumn(maze, visited, dimention, 0, 0, callsFxC, stepsFxC, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopFxC = high_resolution_clock::now();
+  durationFxC = stopFxC - startFxC;
+  timeFxC = durationFxC.count();
+  cout << "Llamadas: " << callsFxC << endl;
+  cout << "Pasos: " << stepsFxC << endl;
+  cout << "Tiempo de ejecución: " << timeFxC << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  initializeBoolMatriz(visited, dimention);
+  // metodo CxF matriz 10x10 ejecutado 10 veces
+  isExit = false;
+  startCxF = high_resolution_clock::now();
+  cout << "Recorrido ColumnasxFilas 10 veces" << endl;
+  for (int i = 0; i < K10; i++)
+  {
+    goColumnByRow(maze, visited, dimention, 0, 0, callsCxF, stepsCxF, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopCxF = high_resolution_clock::now();
+  durationCxF = stopCxF - startCxF;
+  timeCxF = durationCxF.count();
+  cout << "Llamadas: " << callsCxF << endl;
+  cout << "Pasos: " << stepsCxF << endl;
+  cout << "Tiempo de ejecución: " << timeCxF << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  cout << "Laberinto 10x10 ejecutado 10 veces" << endl;
+  cout << "Recorrido FilasxColumnas vs Recorrido ColumnasxFilas" << endl;
+  cout << "Llamadas: " << callsFxC << " vs " << callsCxF << endl;
+  cout << "Pasos: " << stepsFxC << " vs " << stepsCxF << endl;
+  cout << "Tiempo: " << timeFxC << " ms vs " << timeCxF << " ms" << endl;
+  isExit = false;
+  callsFxC = 0, stepsFxC = 0;
+  callsCxF = 0, stepsCxF = 0;
+  initializeBoolMatriz(visited, dimention);
+  // metodo FxC matriz 10x10 ejecutado 100 veces
+  cout << "Laberinto 10x10 ejecutado 100 veces" << endl;
+  startFxC = high_resolution_clock::now();
+  for (int i = 0; i < K100; i++)
+  {
+    goRowByColumn(maze, visited, dimention, 0, 0, callsFxC, stepsFxC, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopFxC = high_resolution_clock::now();
+  durationFxC = stopFxC - startFxC;
+  timeFxC = durationFxC.count();
+  cout << "Llamadas: " << callsFxC << endl;
+  cout << "Pasos: " << stepsFxC << endl;
+  cout << "Tiempo de ejecución: " << timeFxC << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  initializeBoolMatriz(visited, dimention);
+  // metodo CxF matriz 10x10 ejecutado 100 veces
+  isExit = false;
+  startCxF = high_resolution_clock::now();
+  cout << "Recorrido ColumnasxFilas 100 veces" << endl;
+  for (int i = 0; i < K100; i++)
+  {
+    goColumnByRow(maze, visited, dimention, 0, 0, callsCxF, stepsCxF, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopCxF = high_resolution_clock::now();
+  durationCxF = stopCxF - startCxF;
+  timeCxF = durationCxF.count();
+  cout << "Llamadas: " << callsCxF << endl;
+  cout << "Pasos: " << stepsCxF << endl;
+  cout << "Tiempo de ejecución: " << timeCxF << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  cout << "Laberinto 10x10 ejecutado 100 veces" << endl;
+  cout << "Recorrido FilasxColumnas vs Recorrido ColumnasxFilas" << endl;
+  cout << "Llamadas: " << callsFxC << " vs " << callsCxF << endl;
+  cout << "Pasos: " << stepsFxC << " vs " << stepsCxF << endl;
+  cout << "Tiempo: " << timeFxC << " ms vs " << timeCxF << " ms" << endl;
+  isExit = false;
+  callsFxC = 0, stepsFxC = 0;
+  callsCxF = 0, stepsCxF = 0;
+  deleteMatriz(maze, dimention);
+  // matriz 20x20
+  cout << "Laberinto 20x20" << endl;
+  dimention = readMaze("maze20x20.txt", maze);
+  if (dimention == -1)
+  {
+    return 0;
+  }
+  else
+  {
+    printMatriz(maze, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  cout << "Recorrido FilasxColumnas 1 vez" << endl;
+  startFxC = high_resolution_clock::now();
+  goRowByColumn(maze, visited, dimention, 0, 0, callsFxC, stepsFxC, isExit);
+  stopFxC = high_resolution_clock::now();
+  durationFxC = stopFxC - startFxC;
+  timeFxC = durationFxC.count();
+  cout << "Tiempo de ejecución: " << timeFxC << " ms" << endl;
+  cout << "Llamadas: " << callsFxC << endl;
+  cout << "Pasos: " << stepsFxC << endl;
+  deleteBoolMatriz(visited, dimention);
+  initializeBoolMatriz(visited, dimention);
+  isExit = false;
+  startCxF = high_resolution_clock::now();
+  cout << "Recorrido ColumnasxFilas 1 vez" << endl;
+  goColumnByRow(maze, visited, dimention, 0, 0, callsCxF, stepsCxF, isExit);
+  stopCxF = high_resolution_clock::now();
+  durationCxF = stopCxF - startCxF;
+  timeCxF = durationCxF.count();
+  cout << "Tiempo de ejecución: " << timeCxF << " ms" << endl;
+  cout << "Llamadas: " << callsCxF << endl;
+  cout << "Pasos: " << stepsCxF << endl;
+  deleteBoolMatriz(visited, dimention);
+  cout << "Laberinto 20x20 ejecutado 1 vez" << endl;
+  cout << "Recorrido FilasxColumnas vs Recorrido ColumnasxFilas" << endl;
+  cout << "Llamadas: " << callsFxC << " vs " << callsCxF << endl;
+  cout << "Pasos: " << stepsFxC << " vs " << stepsCxF << endl;
+  cout << "Tiempo: " << timeFxC << " ms vs " << timeCxF << " ms" << endl;
+  isExit = false;
+  callsFxC = 0, stepsFxC = 0;
+  callsCxF = 0, stepsCxF = 0;
+  initializeBoolMatriz(visited, dimention);
+  // metodo FxC matriz 20x20 ejecutado 10 veces
+  cout << "Laberinto 20x20 ejecutado 10 veces" << endl;
+  startFxC = high_resolution_clock::now();
+  for (int i = 0; i < K10; i++)
+  {
+    goRowByColumn(maze, visited, dimention, 0, 0, callsFxC, stepsFxC, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopFxC = high_resolution_clock::now();
+  durationFxC = stopFxC - startFxC;
+  timeFxC = durationFxC.count();
+  cout << "Llamadas: " << callsFxC << endl;
+  cout << "Pasos: " << stepsFxC << endl;
+  cout << "Tiempo de ejecución: " << timeFxC << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  initializeBoolMatriz(visited, dimention);
+  // metodo CxF matriz 20x20 ejecutado 10 veces
+  isExit = false;
+  startCxF = high_resolution_clock::now();
+  cout << "Recorrido ColumnasxFilas 10 veces" << endl;
+  for (int i = 0; i < K10; i++)
+  {
+    goColumnByRow(maze, visited, dimention, 0, 0, callsCxF, stepsCxF, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopCxF = high_resolution_clock::now();
+  durationCxF = stopCxF - startCxF;
+  timeCxF = durationCxF.count();
+  cout << "Llamadas: " << callsCxF << endl;
+  cout << "Pasos: " << stepsCxF << endl;
+  cout << "Tiempo de ejecución: " << timeCxF << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  cout << "Laberinto 20x20 ejecutado 10 veces" << endl;
+  cout << "Recorrido FilasxColumnas vs Recorrido ColumnasxFilas" << endl;
+  cout << "Llamadas: " << callsFxC << " vs " << callsCxF << endl;
+  cout << "Pasos: " << stepsFxC << " vs " << stepsCxF << endl;
+  cout << "Tiempo: " << timeFxC << " ms vs " << timeCxF << " ms" << endl;
+  isExit = false;
+  callsFxC = 0, stepsFxC = 0;
+  callsCxF = 0, stepsCxF = 0;
+  initializeBoolMatriz(visited, dimention);
+  // metodo FxC matriz 20x20 ejecutado 100 veces
+  cout << "Laberinto 20x20 ejecutado 100 veces" << endl;
+  startFxC = high_resolution_clock::now();
+  for (int i = 0; i < K100; i++)
+  {
+    goRowByColumn(maze, visited, dimention, 0, 0, callsFxC, stepsFxC, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopFxC = high_resolution_clock::now();
+  durationFxC = stopFxC - startFxC;
+  timeFxC = durationFxC.count();
+  cout << "Llamadas: " << callsFxC << endl;
+  cout << "Pasos: " << stepsFxC << endl;
+  cout << "Tiempo de ejecución: " << timeFxC << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  initializeBoolMatriz(visited, dimention);
+  // metodo CxF matriz 20x20 ejecutado 100 veces
+  isExit = false;
+  startCxF = high_resolution_clock::now();
+  cout << "Recorrido ColumnasxFilas 100 veces" << endl;
+  for (int i = 0; i < K100; i++)
+  {
+    goColumnByRow(maze, visited, dimention, 0, 0, callsCxF, stepsCxF, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopCxF = high_resolution_clock::now();
+  durationCxF = stopCxF - startCxF;
+  timeCxF = durationCxF.count();
+  cout << "Llamadas: " << callsCxF << endl;
+  cout << "Pasos: " << stepsCxF << endl;
+  cout << "Tiempo de ejecución: " << timeCxF << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  cout << "Laberinto 20x20 ejecutado 100 veces" << endl;
+  cout << "Recorrido FilasxColumnas vs Recorrido ColumnasxFilas" << endl;
+  cout << "Llamadas: " << callsFxC << " vs " << callsCxF << endl;
+  cout << "Pasos: " << stepsFxC << " vs " << stepsCxF << endl;
+  cout << "Tiempo: " << timeFxC << " ms vs " << timeCxF << " ms" << endl;
+  isExit = false;
+  callsFxC = 0, stepsFxC = 0;
+  callsCxF = 0, stepsCxF = 0;
+  deleteMatriz(maze, dimention);
+
+  // matriz 50x50
+  cout << "Laberinto 50x50" << endl;
+  dimention = readMaze("maze50x50.txt", maze);
+  if (dimention == -1)
+  {
+    return 0;
+  }
+  else
+  {
+    printMatriz(maze, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  cout << "Recorrido FilasxColumnas 1 vez" << endl;
+  startFxC = high_resolution_clock::now();
+  goRowByColumn(maze, visited, dimention, 0, 0, callsFxC, stepsFxC, isExit);
+  stopFxC = high_resolution_clock::now();
+  durationFxC = stopFxC - startFxC;
+  timeFxC = durationFxC.count();
+  cout << "Tiempo de ejecución: " << timeFxC << " ms" << endl;
+  cout << "Llamadas: " << callsFxC << endl;
+  cout << "Pasos: " << stepsFxC << endl;
+  deleteBoolMatriz(visited, dimention);
+  initializeBoolMatriz(visited, dimention);
+  isExit = false;
+  startCxF = high_resolution_clock::now();
+  cout << "Recorrido ColumnasxFilas 1 vez" << endl;
+  goColumnByRow(maze, visited, dimention, 0, 0, callsCxF, stepsCxF, isExit);
+  stopCxF = high_resolution_clock::now();
+  durationCxF = stopCxF - startCxF;
+  timeCxF = durationCxF.count();
+  cout << "Tiempo de ejecución: " << timeCxF << " ms" << endl;
+  cout << "Llamadas: " << callsCxF << endl;
+  cout << "Pasos: " << stepsCxF << endl;
+  deleteBoolMatriz(visited, dimention);
+  cout << "Laberinto 50x50 ejecutado 1 vez" << endl;
+  cout << "Recorrido FilasxColumnas vs Recorrido ColumnasxFilas" << endl;
+  cout << "Llamadas: " << callsFxC << " vs " << callsCxF << endl;
+  cout << "Pasos: " << stepsFxC << " vs " << stepsCxF << endl;
+  cout << "Tiempo: " << timeFxC << " ms vs " << timeCxF << " ms" << endl;
+  isExit = false;
+  callsFxC = 0, stepsFxC = 0;
+  callsCxF = 0, stepsCxF = 0;
+  initializeBoolMatriz(visited, dimention);
+  // metodo FxC matriz 50x50 ejecutado 10 veces
+  cout << "Laberinto 50x50 ejecutado 10 veces" << endl;
+  startFxC = high_resolution_clock::now();
+  for (int i = 0; i < K10; i++)
+  {
+    goRowByColumn(maze, visited, dimention, 0, 0, callsFxC, stepsFxC, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopFxC = high_resolution_clock::now();
+  durationFxC = stopFxC - startFxC;
+  timeFxC = durationFxC.count();
+  cout << "Llamadas: " << callsFxC << endl;
+  cout << "Pasos: " << stepsFxC << endl;
+  cout << "Tiempo de ejecución: " << timeFxC << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  initializeBoolMatriz(visited, dimention);
+  // metodo CxF matriz 50x50 ejecutado 10 veces
+  isExit = false;
+  startCxF = high_resolution_clock::now();
+  cout << "Recorrido ColumnasxFilas 10 veces" << endl;
+  for (int i = 0; i < K10; i++)
+  {
+    goColumnByRow(maze, visited, dimention, 0, 0, callsCxF, stepsCxF, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopCxF = high_resolution_clock::now();
+  durationCxF = stopCxF - startCxF;
+  timeCxF = durationCxF.count();
+  cout << "Llamadas: " << callsCxF << endl;
+  cout << "Pasos: " << stepsCxF << endl;
+  cout << "Tiempo de ejecución: " << timeCxF << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  cout << "Laberinto 50x50 ejecutado 10 veces" << endl;
+  cout << "Recorrido FilasxColumnas vs Recorrido ColumnasxFilas" << endl;
+  cout << "Llamadas: " << callsFxC << " vs " << callsCxF << endl;
+  cout << "Pasos: " << stepsFxC << " vs " << stepsCxF << endl;
+  cout << "Tiempo: " << timeFxC << " ms vs " << timeCxF << " ms" << endl;
+  isExit = false;
+  callsFxC = 0, stepsFxC = 0;
+  callsCxF = 0, stepsCxF = 0;
+  initializeBoolMatriz(visited, dimention);
+  // metodo FxC matriz 50x50 ejecutado 100 veces
+  cout << "Laberinto 50x50 ejecutado 100 veces" << endl;
+  startFxC = high_resolution_clock::now();
+  for (int i = 0; i < K100; i++)
+  {
+    goRowByColumn(maze, visited, dimention, 0, 0, callsFxC, stepsFxC, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopFxC = high_resolution_clock::now();
+  durationFxC = stopFxC - startFxC;
+  timeFxC = durationFxC.count();
+  cout << "Llamadas: " << callsFxC << endl;
+  cout << "Pasos: " << stepsFxC << endl;
+  cout << "Tiempo de ejecución: " << timeFxC << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  initializeBoolMatriz(visited, dimention);
+  // metodo CxF matriz 50x50 ejecutado 100 veces
+  isExit = false;
+  startCxF = high_resolution_clock::now();
+  cout << "Recorrido ColumnasxFilas 100 veces" << endl;
+  for (int i = 0; i < K100; i++)
+  {
+    goColumnByRow(maze, visited, dimention, 0, 0, callsCxF, stepsCxF, isExit);
+    isExit = false;
+    deleteBoolMatriz(visited, dimention);
+    initializeBoolMatriz(visited, dimention);
+  }
+  stopCxF = high_resolution_clock::now();
+  durationCxF = stopCxF - startCxF;
+  timeCxF = durationCxF.count();
+  cout << "Llamadas: " << callsCxF << endl;
+  cout << "Pasos: " << stepsCxF << endl;
+  cout << "Tiempo de ejecución: " << timeCxF << " ms" << endl;
+  deleteBoolMatriz(visited, dimention);
+  cout << "Laberinto 50x50 ejecutado 100 veces" << endl;
+  cout << "Recorrido FilasxColumnas vs Recorrido ColumnasxFilas" << endl;
+  cout << "Llamadas: " << callsFxC << " vs " << callsCxF << endl;
+  cout << "Pasos: " << stepsFxC << " vs " << stepsCxF << endl;
+  cout << "Tiempo: " << timeFxC << " ms vs " << timeCxF << " ms" << endl;
+  isExit = false;
+  callsFxC = 0, stepsFxC = 0;
+  callsCxF = 0, stepsCxF = 0;
+  deleteMatriz(maze, dimention);
   return 0;
 }
