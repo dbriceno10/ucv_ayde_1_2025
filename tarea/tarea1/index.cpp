@@ -126,28 +126,16 @@ int readMaze(string filename, char **&matriz)
   if (file.is_open())
   {
     int dimention = 0;
-    int contador = 0;
     file >> dimention;
     initializeMatriz(matriz, dimention);
-    // int linea = 0;
     for (int i = 0; i < dimention; i++)
     {
-      // int contador = 0;
       for (int j = 0; j < dimention; j++)
       {
         char value;
         file >> value;
-        contador++;
-        // if (value == wall || value == trail || value == exitChar)
-        // {
-        //   contador++;
-        // }
         matriz[i][j] = value;
-        cout << value << endl;
       }
-      // linea++;
-      // cout << "linea " << linea << ": " << contador << endl;
-      cout << "contador: " << contador << endl;
     }
     file.close();
     return dimention;
@@ -231,7 +219,7 @@ int main()
     initializeBoolMatriz(visited10x10, D10x10);
   }
   // printBoolMatriz(visited10x10, D10x10);
-  // goRowByColumn(maze10x10, visited10x10, D10x10, 0, 0, calls, steps, isExit);
+  goRowByColumn(maze10x10, visited10x10, D10x10, 0, 0, calls, steps, isExit);
   // deleteMatriz(maze10x10, D10x10);
   // deleteBoolMatriz(visited10x10, D10x10);
   // printBoolMatriz(visited10x10, D10x10);
