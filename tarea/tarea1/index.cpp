@@ -126,17 +126,28 @@ int readMaze(string filename, char **&matriz)
   if (file.is_open())
   {
     int dimention = 0;
+    int contador = 0;
     file >> dimention;
     initializeMatriz(matriz, dimention);
+    // int linea = 0;
     for (int i = 0; i < dimention; i++)
     {
+      // int contador = 0;
       for (int j = 0; j < dimention; j++)
       {
         char value;
         file >> value;
-        // cout << value << endl;
+        contador++;
+        // if (value == wall || value == trail || value == exitChar)
+        // {
+        //   contador++;
+        // }
         matriz[i][j] = value;
+        cout << value << endl;
       }
+      // linea++;
+      // cout << "linea " << linea << ": " << contador << endl;
+      cout << "contador: " << contador << endl;
     }
     file.close();
     return dimention;
@@ -152,17 +163,11 @@ int readMaze(string filename, char **&matriz)
 bool goRowByColumn(char **&matriz, bool **&visited, int n, int row, int col, int &calls, int &steps, bool &isExit)
 {
   printMatrizActual(matriz, n, col, row);
-  calls++;
-  // if (isLimt(row, col, n))
-  // {
-  //   cout << "isLimt: " << isLimt(row, col, n) << endl;
-  //   cout << "No se puede avanzar a la fila " << row << ", columna " << col << endl;
-  //   return false;
-  // }
   if (isExit)
   {
     return true;
   }
+  calls++;
   if (isExitFound(matriz, row, col))
   {
     isExit = true;
@@ -175,24 +180,37 @@ bool goRowByColumn(char **&matriz, bool **&visited, int n, int row, int col, int
   // derecha
   if (!isLimt(row, col + 1, n) && !isWall(matriz, row, col + 1) && !visited[row][col + 1])
   {
-    goRowByColumn(matriz, visited, n, row, col + 1, calls, steps, isExit);
+    if (goRowByColumn(matriz, visited, n, row, col + 1, calls, steps, isExit))
+    {
+      return true;
+    }
   }
   // izquierda
   if (!isLimt(row, col - 1, n) && !isWall(matriz, row, col - 1) && !visited[row][col - 1])
   {
-    goRowByColumn(matriz, visited, n, row, col - 1, calls, steps, isExit);
+    if (goRowByColumn(matriz, visited, n, row, col - 1, calls, steps, isExit))
+    {
+      return true;
+    }
   }
   // arriba
   if (!isLimt(row + 1, col, n) && !isWall(matriz, row + 1, col) && !visited[row + 1][col])
   {
-    goRowByColumn(matriz, visited, n, row + 1, col, calls, steps, isExit);
+    if (goRowByColumn(matriz, visited, n, row + 1, col, calls, steps, isExit))
+    {
+      return true;
+    }
   }
   // abajo
   if (!isLimt(row - 1, col, n) && !isWall(matriz, row - 1, col) && !visited[row - 1][col])
   {
-    goRowByColumn(matriz, visited, n, row - 1, col, calls, steps, isExit);
+    if (goRowByColumn(matriz, visited, n, row - 1, col, calls, steps, isExit))
+    {
+      return true;
+    }
   }
   visited[row][col] = false;
+  steps--;
   return false;
 }
 
@@ -202,7 +220,7 @@ int main()
   bool **visited10x10;
   int calls = 0, steps = 0;
   bool isExit = false;
-  int D10x10 = readMaze("maze5x5.txt", maze10x10);
+  int D10x10 = readMaze("maze50x50.txt", maze10x10);
   if (D10x10 == -1)
   {
     return 0;
@@ -213,7 +231,7 @@ int main()
     initializeBoolMatriz(visited10x10, D10x10);
   }
   // printBoolMatriz(visited10x10, D10x10);
-  goRowByColumn(maze10x10, visited10x10, D10x10, 0, 0, calls, steps, isExit);
+  // goRowByColumn(maze10x10, visited10x10, D10x10, 0, 0, calls, steps, isExit);
   // deleteMatriz(maze10x10, D10x10);
   // deleteBoolMatriz(visited10x10, D10x10);
   // printBoolMatriz(visited10x10, D10x10);
