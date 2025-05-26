@@ -15,7 +15,7 @@ int fibonacci(int n)
   return fibonacci(n - 1) + fibonacci(n - 2);
 }
 
-int binary(int arr[], int left, int right, int target)
+int binarySearch(int arr[], int left, int right, int target)
 {
   if (left > right)
     return -1;
@@ -42,7 +42,7 @@ int main()
   int arr2[] = {1, 3, 5, 7, 9, 11};
   int n2 = sizeof(arr2) / sizeof(arr2[0]);
   int target = 7;
-  int result = binary(arr2, 0, n2 - 1, target);
+  int result = binarySearch(arr2, 0, n2 - 1, target);
   if (result != -1)
     cout << "Elemento " << target << " encontrado en la posición: " << result << endl;
   else
