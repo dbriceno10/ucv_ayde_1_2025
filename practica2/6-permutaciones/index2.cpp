@@ -44,32 +44,6 @@ void generarPermutaciones(char arr[], int n, int index)
   }
 }
 
-// Función recursiva para generar permutaciones cuya suma sea par
-void generarPermutacionesSumaPar(char arr[], int n, int index)
-{
-  if (index == n)
-  {
-    // Validar si la suma es par
-    if (calcularSuma(arr, n) % 2 == 0)
-    {
-      // Imprimir la permutación
-      for (int i = 0; i < n; i++)
-      {
-        cout << arr[i];
-      }
-      cout << endl;
-    }
-    return;
-  }
-
-  for (int i = index; i < n; i++)
-  {
-    swap(arr[index], arr[i]);                       // Intercambiar
-    generarPermutacionesSumaPar(arr, n, index + 1); // Llamada recursiva
-    swap(arr[index], arr[i]);                       // Deshacer el intercambio
-  }
-}
-
 int main()
 {
   char arr[MAX_N] = {'A', 'd', 'w', 'F', 'm', 'l', 'R', 'W', 'p', 'y'};
@@ -91,9 +65,6 @@ int main()
 
   cout << "\nTodas las permutaciones posibles:" << endl;
   generarPermutaciones(arr, n, 0);
-
-  cout << "\nPermutaciones cuya suma sea par:" << endl;
-  generarPermutacionesSumaPar(arr, n, 0);
 
   return 0;
 }
