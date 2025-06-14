@@ -1,0 +1,8 @@
+Podemos picar el codigo en varios archivos.
+insruccion #pragma once ---> enita que se incluyan librerias de forma repetidas
+pila--> ultimo en entrar es el primero en salir (LIFO Last In First Out)
+cola --> el primero en entrar es el primero en salir (FIFO First In First Out)
+dipolo --> es una mezcla de pila y cola, favorece a los extremos (primero o ultimos)
+la pila, la cola y el diplolo no son ordenables
+
+libreria exceptions --> la puedo usar para manejar errores
