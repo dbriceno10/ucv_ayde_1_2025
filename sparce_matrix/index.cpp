@@ -73,7 +73,7 @@ private:
     return *p; // si ya existe, devolvemos el nodo existente
   }
 
-  NodeC<T> *getOrCreateCol(int idCol)
+  NodeC<T> getOrCreateCol(int idCol)
   {
     NodeC<T> **p = &(Matrix->pFirstC);
     while (*p != nullptr && (*p)->idR < idCol)
@@ -156,6 +156,58 @@ public:
 
     newNode->pNextC = *pCol; // enlazamos el nuevo nodo con el siguiente nodo de columna
     *pCol = newNode;         // actualizamos el puntero al nuevo nodo de columna
+  }
+
+  bool IsElementOf(int i, int j)
+  {
+    NodeR<T> *row = Matrix->pFirstR; // buscamos la fila, empiezo por un nodo R
+    while (row != nullptr && row->idR < i)
+    {
+      row = row->pNext; // nos movemos al siguiente nodo de fila
+    }
+
+    if (row == nullptr || row->idR != i)
+    // if (row == nullptr)
+
+    {
+      return false; // si no existe la fila, no hay elemento
+    }
+
+    NodeC<T> *col = row->pFirst; // obtenemos el primer nodo de la fila
+    while (col != nullptr && col->idC < j)
+    {
+      col = col->pNext; // nos movemos al siguiente nodo de fila
+    }
+    return (col != nullptr && col->idC == j); // si existe la columna, devolvemos true
+  }
+
+  void Delete (int IdR, int IdC)
+  {
+    NodeR<T> *row = Matrix->pFirstR; // buscamos la fila
+    while (row != nullptr && row->idR < IdR)
+    {
+      row = row->pNext; // nos movemos al siguiente nodo de fila
+    }
+
+    if (row == nullptr || row->idR != IdR)
+    {
+      return; // si no existe la fila, no hay elemento para eliminar
+    }
+
+    NodeR<T> **pNode = &(row->pFirst);
+    while (*pNode != nullptr && (*pNode)->idF < IdC)
+    {
+      pNode = &((*pNode)->pNextF); // nos movemos al siguiente nodo de fila
+    }
+
+    if (*pNode == nullptr || (*pNode)->idF != IdC)
+    {
+      return; // si no existe el nodo, no hay elemento para eliminar
+    }
+
+    Node<T> *toDelete = *pNode;
+    *pNode = toDelete->pNextF; // enlazamos el nodo anterior con el siguiente nodo de fila
+    delete toDelete;            // liberamos la memoria del nodo eliminado
   }
 };
 

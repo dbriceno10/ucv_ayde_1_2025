@@ -81,17 +81,30 @@ public:
     return v->data;
   }
   // insertar
+  // void insert(int d, tPosition v)
+  // {
+  //   tPosition current = head;
+  //   while (current->next != nullptr)
+  //   {
+  //     current = current->next;
+  //   }
+  //   // current->next = nullptr;
+  //   current->next = new Node(d, v);
+  //   size++;
+  // }
+
   void insert(int d, tPosition v)
   {
     tPosition current = head;
-    while (current->next != nullptr)
+    // Buscar el nodo anterior a v
+    while (current->next != v)
     {
       current = current->next;
     }
-    // current->next = nullptr;
     current->next = new Node(d, v);
     size++;
   }
+
   // borrar un nodo
   void Delete(tPosition v)
   {
@@ -134,3 +147,61 @@ public:
     size = 0;
   }
 };
+
+int main()
+{
+  IntList lista;
+  int opcion;
+  do
+  {
+    cout << "\n--- MENU LISTA ENLAZADA ---\n";
+    cout << "1. Insertar al final\n";
+    cout << "2. Eliminar primer elemento\n";
+    cout << "3. Imprimir lista\n";
+    cout << "4. Limpiar lista\n";
+    cout << "5. Salir\n";
+    cout << "Seleccione una opción: ";
+    cin >> opcion;
+
+    if (opcion == 1)
+    {
+      int valor;
+      cout << "Ingrese el valor a insertar: ";
+      cin >> valor;
+      lista.insert(valor, lista.last());
+      cout << "Valor insertado.\n";
+    }
+    else if (opcion == 2)
+    {
+      if (!lista.IsEmpty())
+      {
+        lista.Delete(lista.first());
+        cout << "Primer elemento eliminado.\n";
+      }
+      else
+      {
+        cout << "La lista está vacía.\n";
+      }
+    }
+    else if (opcion == 3)
+    {
+      cout << "Contenido de la lista:\n";
+      lista.printl();
+    }
+    else if (opcion == 4)
+    {
+      lista.clear();
+      cout << "Lista limpiada.\n";
+    }
+    else if (opcion == 5)
+    {
+      cout << "Saliendo...\n";
+    }
+    else
+    {
+      cout << "Opción no válida.\n";
+    }
+  } while (opcion != 5);
+
+  return 0;
+}
