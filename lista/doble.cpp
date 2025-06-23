@@ -2,13 +2,14 @@
 using namespace std;
 
 template <typename T>
-class SimpleList
+class DobleList
 {
   struct Node
   {
     T data;
     Node *next;
-    Node(const T &d, Node *n = nullptr) : data(d), next(n) {}
+    Node *prev; // Puntero al nodo anterior
+    Node(const T &d, Node *n = nullptr, Node *p = nullptr) : data(d), next(n), prev(p) {}
   };
   Node *head;
   Node *tail;
@@ -17,23 +18,26 @@ class SimpleList
 public:
   typedef Node *tPosition;
   // Consturctor default para inicialilzar la lista vacia
-  SimpleList() : size(0)
+  DobleList() : size(0)
   {
     tail = new Node(T());
     head = new Node(T(), tail);
+    tail->prev = head;
+    head->prev = nullptr;
+    tail->next = nullptr;
   }
 
   // constructor para inicializar la lista con un valor
-  SimpleList(const T &value)
-  {
-    tail = new Node(value);
-    head = new Node(value, tail);
-    size = 1;
-  }
+  // DobleList(const T &value)
+  // {
+  //   tail = new Node(value);
+  //   head = new Node(value, tail);
+  //   size = 1;
+  // }
 
-  ~SimpleList()
+  ~DobleList()
   {
-    // Clear();
+    Clear();
     delete head;
     delete tail;
   }
@@ -83,6 +87,17 @@ public:
     //   pValue = tail; // Si ya es el último nodo, se mantiene en tail
     // }
   }
+
+  // Directiva 4.5(Prev): Retrocede al nodo anterior
+
+  void Prev(tPosition &pValue)
+  {
+    if (pValue->prev != head)
+    {
+      pValue = pValue->prev;
+    }
+  }
+
   tPosition GetXNode(int index)
   {
     if (IsEmpty())
@@ -111,14 +126,23 @@ public:
   // Directiva 6(Insert): Inserta un nuevo nodo con el valor d antes del nodo v
   void Insert(const T &d, tPosition v)
   {
-    tPosition current = First();
+    tPosition current = head;
     while (current->next != v && current->next != nullptr) // o tambien current ! tail
     {
       Next(current);
     }
     if (current->next == v)
     {
-      current->next = new Node(d, v);
+      tPosition newNode = new Node(d, v, current);
+      current->next = newNode;
+      if (v != tail)
+      {
+        v->prev = newNode;
+      }
+      else
+      {
+        tail->prev = newNode;
+      }
       size++;
     }
   }
@@ -147,7 +171,7 @@ public:
   // Directiva 8(Clear): Elimina todos los nodos de la lista
   void Clear()
   {
-    tPosition current = First();
+    tPosition current = head;
     while (current != tail)
     {
       tPosition toDelete = current;
@@ -160,7 +184,7 @@ public:
 
   void Print()
   {
-    tPosition current = First();
+    tPosition current = head;
     while (current != tail)
     {
       // cout << current->data << endl;
@@ -169,34 +193,3 @@ public:
     }
   }
 };
-
-int main(int argc, char const *argv[])
-{
-  SimpleList<int> lista;
-  lista.Insert(10, lista.Last());
-  lista.Insert(20, lista.Last());
-  lista.Insert(30, lista.Last());
-  lista.Print();
-  cout << "Size: " << lista.IsEmpty() << endl;
-  lista.Clear();
-  cout << "Size after clear: " << lista.IsEmpty() << endl;
-  lista.Insert(40, lista.Last());
-  lista.Print();
-  lista.Insert(50, lista.Last());
-  lista.Print();
-  lista.Insert(60, lista.Last());
-  lista.Print();
-  lista.Insert(70, lista.Last());
-  lista.Print();
-  lista.Insert(80, lista.Last());
-  lista.Print();
-  lista.Insert(90, lista.Last());
-  lista.Print();
-  lista.Insert(100, lista.Last());
-  lista.Print();
-  cout << "Size after insertions: " << lista.IsEmpty() << endl;
-  lista.Clear();
-  cout << "Size after clear: " << lista.IsEmpty() << endl;
-  lista.Print();
-  return 0;
-}
