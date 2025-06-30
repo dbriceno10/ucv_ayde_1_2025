@@ -111,7 +111,7 @@ public:
   // Directiva 6(Insert): Inserta un nuevo nodo con el valor d antes del nodo v
   void Insert(const T &d, tPosition v)
   {
-    tPosition current = First();
+    tPosition current = head;
     while (current->next != v && current->next != nullptr) // o tambien current ! tail
     {
       Next(current);
@@ -147,8 +147,8 @@ public:
   // Directiva 8(Clear): Elimina todos los nodos de la lista
   void Clear()
   {
-    tPosition current = First();
-    while (current != tail)
+    tPosition current = head;
+    while (current->next != tail)
     {
       tPosition toDelete = current;
       Next(current);
@@ -161,42 +161,39 @@ public:
   void Print()
   {
     tPosition current = First();
-    while (current != tail)
+    while (current->next != tail)
     {
       // cout << current->data << endl;
       cout << Get(current) << endl;
       Next(current);
     }
   }
+
+  int Size() const
+  {
+    return size;
+  }
 };
 
 int main(int argc, char const *argv[])
 {
   SimpleList<int> lista;
-  lista.Insert(10, lista.Last());
-  lista.Insert(20, lista.Last());
-  lista.Insert(30, lista.Last());
+  // Insertar elementos
+  lista.Insert(1, lista.Last());
+  lista.Insert(2, lista.Last());
+  lista.Insert(3, lista.Last());
+  lista.Insert(4, lista.Last());
+  lista.Insert(5, lista.Last());
+  lista.Insert(6, lista.Last());
   lista.Print();
-  cout << "Size: " << lista.IsEmpty() << endl;
+  cout << "Tamaño de la lista: " << lista.Size() << endl;
+  cout << "Primer elemento: " << lista.Get(lista.First()) << endl;
+  cout << "Ultimo elemento: " << lista.Get(lista.Last()) << endl;
+  cout << "Elemento en la posicion 3: " << lista.Get(lista.GetXNode(3)) << endl;
+  lista.Delete(lista.GetXNode(3));
+  cout << "Lista despues de eliminar el elemento en la posicion 3:" << endl;
+  lista.Print();
+  cout << "Tamaño de la lista: " << lista.Size() << endl;
   lista.Clear();
-  cout << "Size after clear: " << lista.IsEmpty() << endl;
-  lista.Insert(40, lista.Last());
-  lista.Print();
-  lista.Insert(50, lista.Last());
-  lista.Print();
-  lista.Insert(60, lista.Last());
-  lista.Print();
-  lista.Insert(70, lista.Last());
-  lista.Print();
-  lista.Insert(80, lista.Last());
-  lista.Print();
-  lista.Insert(90, lista.Last());
-  lista.Print();
-  lista.Insert(100, lista.Last());
-  lista.Print();
-  cout << "Size after insertions: " << lista.IsEmpty() << endl;
-  lista.Clear();
-  cout << "Size after clear: " << lista.IsEmpty() << endl;
-  lista.Print();
   return 0;
 }
