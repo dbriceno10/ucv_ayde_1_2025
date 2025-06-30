@@ -55,7 +55,7 @@ public:
   }
   ~IntVector()
   {
-    delete data;
+    delete[] data;
     size = 0;
   }
 
@@ -128,6 +128,40 @@ public:
     data = aux;
     size++;
     return size;
+  }
+
+  void sort()
+  {
+    for (int i = 0; i < size - 1; i++)
+    {
+      for (int j = i + 1; j < size; j++)
+      {
+        if (data[i] > data[j])
+        {
+          int temp = data[i];
+          data[i] = data[j];
+          data[j] = temp;
+        }
+      }
+    }
+  }
+
+  void forEach(void (*func)(int &))
+  {
+    for (int i = 0; i < size; i++)
+    {
+      func(data[i]);
+    }
+  }
+
+  IntVector map(int (*func)(int))
+  {
+    IntVector newVec(size);
+    for (int i = 0; i < size; i++)
+    {
+      newVec.data[i] = func(data[i]);
+    }
+    return newVec;
   }
 };
 

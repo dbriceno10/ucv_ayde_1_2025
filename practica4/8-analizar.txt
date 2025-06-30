@@ -1,0 +1,95 @@
+8. Dada la siguiente secuencia de instrucciones indique que ocurre en cada línea. Indique además si queda algún 
+elemento por liberar de memoria al terminar LOL( ). 
+class Nodo { 
+    public: 
+                 int Info; 
+                 Nodo *prox; 
+} 
+Nodo *P, *Q; 
+ 
+void LOL( ) { 
+               P = new Nodo ( ); 
+               P->Info = 10; 
+               P->prox = P; 
+               Q = new Nodo ( ); 
+               P->prox = Q; 
+               Q->Info = P->Info + 3; 
+               Q->prox = P; 
+               Q->prox = NULL; 
+               Q = new Nodo ( ); 
+               Q->Info = P->Info + P->prox->Info; 
+               P->prox->prox = Q; 
+               Q->prox = NULL; 
+               Q = P; 
+               while ( Q != NULL ) { 
+                 std::cout  << Q->Info << std::endl; 
+                 Q = Q->prox; 
+               } 
+} 
+
+Aquí tienes el análisis línea por línea de la función LOL() y al final, qué memoria queda sin liberar:
+
+Declaraciones
+Se declara la clase y dos punteros a Nodo.
+Dentro de LOL()
+P = new Nodo();
+
+Reserva memoria para un nodo.
+P apunta a este nodo.
+P->Info = 10;
+
+El campo Info del nodo apuntado por P se pone en 10.
+P->prox = P;
+
+El campo prox de P apunta a sí mismo (ciclo de un solo nodo).
+Q = new Nodo();
+
+Reserva memoria para otro nodo.
+Q apunta a este nuevo nodo.
+P->prox = Q;
+
+El campo prox de P ahora apunta a Q (ya no a sí mismo).
+Q->Info = P->Info + 3;
+
+El campo Info de Q se pone en 13.
+Q->prox = P;
+
+El campo prox de Q apunta a P (ciclo de dos nodos: P → Q → P).
+Q->prox = NULL;
+
+El campo prox de Q ahora apunta a NULL (rompe el ciclo, Q es el final de la lista).
+Q = new Nodo();
+
+Reserva memoria para un tercer nodo.
+Q apunta a este nuevo nodo.
+Q->Info = P->Info + P->prox->Info;
+
+P->Info es 10, P->prox apunta al nodo anterior Q (con Info 13).
+Así que Q->Info = 10 + 13 = 23.
+P->prox->prox = Q;
+
+P->prox es el primer Q (con Info 13).
+Así que Q (con Info 23) se enlaza como siguiente de ese nodo:
+P (10) → Q (13) → Q (23)
+Q->prox = NULL;
+
+El último nodo apunta a NULL.
+Q = P;
+
+Q apunta al primer nodo (P).
+while (Q != NULL) { std::cout << Q->Info << std::endl; Q = Q->prox; }
+
+Recorre la lista desde P e imprime los valores:
+Imprime 10 (P)
+Imprime 13 (P->prox)
+Imprime 23 (P->prox->prox)
+Termina porque el siguiente es NULL.
+¿Queda memoria sin liberar?
+Sí.
+
+Se reservaron tres nodos con new Nodo(), pero ninguno se libera con delete.
+Al terminar la función, se pierde la referencia a los nodos y hay fuga de memoria.
+Resumen de la lista final
+P (Info=10) → Q (Info=13) → Q (Info=23) → NULL
+Elementos por liberar
+Los tres nodos creados con new Nodo() quedan sin liberar (fuga de memoria).

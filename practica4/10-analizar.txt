@@ -1,0 +1,19 @@
+10. Realice la traza del siguiente algoritmo. En cada línea, muestre el estado de las estructuras de datos gráficamente, y en 
+caso de que la instrucción sea incorrecta, indicar el tipo de error. 
+struct Nodo { 
+  int Info; 
+  Nodo *prox; 
+           } 
+ 
+ Nodo **p, **s, *q, *r; 
+ p = &q; 
+ q->info = 30; 
+ q->prox = NULL; 
+ r =  new Nodo ( ); 
+ r->info = 2; 
+ s = &r; 
+ delete q; 
+ q =  new Nodo (); 
+q->info = 31; 
+ s->prox = q; 
+ (*p)->info = q->info + (*s)->prox->info;

@@ -100,6 +100,7 @@ public:
       cout << current->next << endl;
       cout << current->next->data << endl;
       cout << Get(current) << endl;
+      cout << current << endl;
       current = current->next;
       count++;
     }
@@ -123,10 +124,10 @@ int main()
 {
   IntList lista;
   lista.insert(1, lista.last());
-  lista.insert(2, lista.last());
-  lista.insert(3, lista.last());
-  lista.insert(4, lista.last());
-  lista.insert(5, lista.last());
+  // lista.insert(2, lista.last());
+  // lista.insert(3, lista.last());
+  // lista.insert(4, lista.last());
+  // lista.insert(5, lista.last());
   int opcion;
   do
   {
