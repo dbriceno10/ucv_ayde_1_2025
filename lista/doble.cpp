@@ -164,6 +164,7 @@ public:
     if (current->next == v)
     {
       current->next = v->next;
+      v->next->prev = current; // Actualiza el puntero prev del siguiente nodo
       delete v;
       size--;
     }
