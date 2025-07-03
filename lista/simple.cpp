@@ -185,15 +185,21 @@ int main(int argc, char const *argv[])
   lista.Insert(4, lista.Last());
   lista.Insert(5, lista.Last());
   lista.Insert(6, lista.Last());
-  lista.Print();
-  cout << "Tamaño de la lista: " << lista.Size() << endl;
-  cout << "Primer elemento: " << lista.Get(lista.First()) << endl;
-  cout << "Ultimo elemento: " << lista.Get(lista.Last()) << endl;
-  cout << "Elemento en la posicion 3: " << lista.Get(lista.GetXNode(3)) << endl;
-  lista.Delete(lista.GetXNode(3));
-  cout << "Lista despues de eliminar el elemento en la posicion 3:" << endl;
-  lista.Print();
-  cout << "Tamaño de la lista: " << lista.Size() << endl;
-  lista.Clear();
+  // lista.Print();
+  // cout << "Tamaño de la lista: " << lista.Size() << endl;
+  // cout << "Primer elemento: " << lista.Get(lista.First()) << endl;
+  // cout << "Ultimo elemento: " << lista.Get(lista.Last()) << endl;
+  // cout << "Elemento en la posicion 3: " << lista.Get(lista.GetXNode(3)) << endl;
+  // lista.Delete(lista.GetXNode(3));
+  // cout << "Lista despues de eliminar el elemento en la posicion 3:" << endl;
+  // lista.Print();
+  // cout << "Tamaño de la lista: " << lista.Size() << endl;
+  // lista.Clear();
+  SimpleList<int>::tPosition current = lista.First();
+  while (current->next)
+  {
+    /* code */
+  }
+  
   return 0;
 }

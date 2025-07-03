@@ -93,11 +93,6 @@ public:
   //   size++;
   // }
 
-  int sizeOf()
-  {
-    return size;
-  }
-
   void insert(int d, tPosition v)
   {
     tPosition current = head;
@@ -107,38 +102,6 @@ public:
       current = current->next;
     }
     current->next = new Node(d, v);
-    size++;
-  }
-
-  // void sortedInsert(int d)
-  // {
-  //   tPosition current = head;
-  //   tPosition newNode = new Node(d);
-  //   // Buscar la posición correcta para insertar el nuevo nodo
-  //   while (current->next != nullptr && current->next->data <= d)
-  //   {
-  //     current = current->next;
-  //   }
-  //   // Insertar el nuevo nodo en la posición encontrada
-  //   newNode->next = current->next;
-  //   current->next = newNode;
-  //   size++;
-  // }
-
-  void sortedInsert(int d)
-  {
-    tPosition current = head;
-    tPosition newNode = new Node(d);
-
-    // Buscar el primer nodo cuyo siguiente tenga un valor mayor o igual
-    while (current->next != tail && current->next->data < d)
-    {
-      current = current->next;
-    }
-
-    // Insertar el nuevo nodo
-    newNode->next = current->next;
-    current->next = newNode;
     size++;
   }
 
@@ -188,67 +151,18 @@ public:
 int main()
 {
   IntList lista;
-  // int opcion;
-  // do
-  // {
-  //   cout << "\n--- MENU LISTA ENLAZADA ---\n";
-  //   cout << "1. Insertar al final\n";
-  //   cout << "2. Eliminar primer elemento\n";
-  //   cout << "3. Imprimir lista\n";
-  //   cout << "4. Limpiar lista\n";
-  //   cout << "5. Salir\n";
-  //   cout << "Seleccione una opción: ";
-  //   cin >> opcion;
-
-  //   if (opcion == 1)
-  //   {
-  //     int valor;
-  //     cout << "Ingrese el valor a insertar: ";
-  //     cin >> valor;
-  //     lista.insert(valor, lista.last());
-  //     cout << "Valor insertado.\n";
-  //   }
-  //   else if (opcion == 2)
-  //   {
-  //     if (!lista.IsEmpty())
-  //     {
-  //       lista.Delete(lista.first());
-  //       cout << "Primer elemento eliminado.\n";
-  //     }
-  //     else
-  //     {
-  //       cout << "La lista está vacía.\n";
-  //     }
-  //   }
-  //   else if (opcion == 3)
-  //   {
-  //     cout << "Contenido de la lista:\n";
-  //     lista.printl();
-  //   }
-  //   else if (opcion == 4)
-  //   {
-  //     lista.clear();
-  //     cout << "Lista limpiada.\n";
-  //   }
-  //   else if (opcion == 5)
-  //   {
-  //     cout << "Saliendo...\n";
-  //   }
-  //   else
-  //   {
-  //     cout << "Opción no válida.\n";
-  //   }
-  // } while (opcion != 5);
-
-  lista.sortedInsert(32);
-  lista.sortedInsert(22);
-  lista.sortedInsert(4);
-  lista.sortedInsert(1);
-  lista.sortedInsert(64);
-  lista.sortedInsert(23);
-  lista.sortedInsert(22);
+lista.insert(1, lista.last());
+  lista.insert(2, lista.last());
+  lista.insert(3, lista.last());
+  lista.insert(4, lista.last());
+  lista.insert(5, lista.last());
+  lista.insert(6, lista.last());
+  lista.insert(7, lista.last());
+  lista.insert(8, lista.last());
+  lista.insert(9, lista.last());
+  lista.insert(10, lista.last());
 
   lista.printl();
-  cout << "Tamaño de la lista: " << lista.sizeOf() << endl;
+
   return 0;
 }
