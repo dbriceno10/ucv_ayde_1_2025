@@ -42,6 +42,19 @@ public:
     count--;
     return vidaActual;
   }
+
+  int curarNDanos(int n)
+  {
+    for (int i = 0; i < n && topNode != nullptr; i++)
+    {
+      tPosition temp = topNode;
+      topNode = topNode->next;
+      vidaActual += temp->dano.cantidad;
+      delete temp;
+      count--;
+    }
+    return vidaActual;
+  }
   int curarPorTipo(int tipo)
   {
 
