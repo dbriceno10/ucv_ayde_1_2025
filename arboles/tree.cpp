@@ -6,7 +6,8 @@ using namespace std;
 template <typename T>
 class GenTree
 {
-protected:
+// protected:
+public:
   struct Node
   {
     T data;
@@ -18,6 +19,8 @@ protected:
     Node *root;
     int size; //*puede ser la cardinalidad o cantidad de nodos o niveles
   };
+
+  private:
 
   void deleteSubTree(Node *node)
   {
