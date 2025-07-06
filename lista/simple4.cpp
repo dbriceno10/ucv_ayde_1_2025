@@ -24,17 +24,17 @@ public:
   }
 
   
-  SimpleList(const T &d) : size(1)
-  {
-    tail = new Node(d);
-    head = new Node(T(), tail);
-  }
-
   // SimpleList(const T &d) : size(1)
   // {
-  //   tail = new Node(T());
-  //   head = new Node(d, tail);
+  //   tail = new Node(d);
+  //   head = new Node(T(), tail);
   // }
+
+  SimpleList(const T &d) : size(1)
+  {
+    tail = new Node(T());
+    head = new Node(d, tail);
+  }
 
   ~SimpleList()
   {
@@ -50,7 +50,7 @@ public:
 
   tPosition first()
   {
-    return (head->next != tail) ? head->next : tail;
+    return (head->next != tail) ? head : tail;
   }
 
   tPosition last()
@@ -91,6 +91,20 @@ public:
     {
       tail->next = new Node(d);
       tail = tail->next;
+    }
+    size++;
+  }
+
+  void insertFirst(const T &d)
+  {
+    if (head->next == tail)
+    {
+      head->next = new Node(d, tail);
+    }
+    else
+    {
+      Node *newNode = new Node(d, head->next);
+      head->next = newNode;
     }
     size++;
   }
