@@ -57,7 +57,7 @@ void imprimirPermutacion(char arr[], int n, string *array, int &size)
 }
 
 // Función recursiva para generar todas las permutaciones
-void generarPermutaciones(char arr[], int n, int index, string *array, int &size)
+void generarPermutaciones(char *arr, int n, int index, string *array, int &size)
 {
   // cout << "index: " << index << endl;
   // cout << "n: " << n << endl;
@@ -148,23 +148,41 @@ int factorial(int n)
 
 int main()
 {
-  char arr[MAX_N] = {'H', 'H', 'E', 'E', 'E'};
-  int n = 5;
+  // char arr[MAX_N] = {'H', 'H', 'E', 'E', 'E'};
+  // int n = 5;
+
+  string dna = readInput();
+  cout << "DNA string: " << dna << endl;
+  int n = dna.size();
+  char *c = new char[n + 1];
+  for (int i = 0; i < n; i++)
+  {
+    c[i] = dna[i];
+  }
+  for (int i = 0; i < n; i++)
+  {
+    cout << c[i] << " ";
+  }
 
   int combinaciones = factorial(n);
 
   string *array = new string[combinaciones];
   int size = 0;
 
-  cout << "\nTodas las permutaciones posibles:" << endl;
-  generarPermutaciones(arr, n, 0, array, size);
+  cout << "\nTodas las permutaciones posibles: " << combinaciones << endl;
+  generarPermutaciones(c, n, 0, array, size);
 
-  cout << "Total de permutaciones: " << size << endl;
+  cout << "Total de permutaciones validas: " << size << endl;
   cout << "Permutaciones:" << endl;
   for (int i = 0; i < size; i++)
   {
     cout << array[i] << endl;
   }
+
+  delete[] c;      // Free the allocated memory
+  c = nullptr;     // Avoid dangling pointer
+  delete[] array;  // Free the allocated memory for permutations
+  array = nullptr; // Avoid dangling pointer
 
   return 0;
 }
