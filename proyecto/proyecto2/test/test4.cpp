@@ -137,6 +137,25 @@ public:
     dna = strDna;
     initializeAdjMatriz();
     initializeNodes();
+    // for (int i = 0; i < nNodes; i++)
+    // {
+    //   for (int j = 0; j < nNodes; j++)
+    //   {
+    //     if (canLink(i, j))
+    //     {
+    //       adjMatrix[i][j] = true;
+    //       adjMatrix[j][i] = true;
+    //     }
+    //   }
+    // }
+  }
+
+  void backtraking(const int i, const int j)
+  {
+    if (i == nNodes - 1 && j == nNodes - 1)
+    {
+      printAdj();
+    }
     for (int i = 0; i < nNodes; i++)
     {
       for (int j = 0; j < nNodes; j++)
@@ -145,8 +164,12 @@ public:
         {
           adjMatrix[i][j] = true;
           adjMatrix[j][i] = true;
-          // nodes[i].maxLinks++;
-          // nodes[j].maxLinks++;
+        }
+        backtraking(i, j);
+        if (canLink(i, j))
+        {
+          adjMatrix[i][j] = false;
+          adjMatrix[j][i] = false;
         }
       }
     }
@@ -172,6 +195,7 @@ public:
     }
     cout << endl;
     cout << "    ";
+    cout << "    ";
     for (int i = 0; i < nNodes; i++)
     {
       cout << "  " << i;
@@ -183,8 +207,6 @@ public:
       cout << nodes[i].type << '(' << i << ')';
       for (int j = 0; j < nNodes; j++)
       {
-        // if (adjMatrix[i][j])
-        //   cout << j << "(" << nodes[j].type << ") ";
         cout << "  " << adjMatrix[i][j];
       }
       cout << "\n";
@@ -198,7 +220,6 @@ public:
     {
       cout << "type: " << nodes[i].type << endl;
       cout << "maxLinks: " << nodes[i].maxLinks << endl;
-      // cout << "actualLinks: " << nodes[i].actualLinks << endl;
     }
   }
 };
@@ -213,11 +234,6 @@ string readInput()
   string input;
   cout << "Enter a string: ";
   cin >> input;
-  if (!input.size())
-  {
-    cout << "El ADN no puede estar vacío";
-    return "-1";
-  }
   string aux = input;
   for (int i = 0; i < input.size(); i++)
   {
@@ -270,26 +286,10 @@ int main(int argc, char const *argv[])
 {
   string dna = readInput();
   cout << "DNA string: " << dna << endl;
-  if (dna == "-1")
-  {
-    return 0;
-  }
   DNA dnaNumoris = DNA(dna);
-  dnaNumoris.printAdj();
-  dnaNumoris.printNodes();
-  // int n = dna.size();
-  // char *c = new char[n + 1];
-  // for (int i = 0; i < n; i++)
-  // {
-  //   c[i] = dna[i];
-  // }
-  // for (int i = 0; i < n; i++)
-  // {
-  //   cout << c[i] << " ";
-  // }
-
-  // delete[] c;  // Free the allocated memory
-  // c = nullptr; // Avoid dangling pointer
+  // dnaNumoris.printAdj();
+  // dnaNumoris.printNodes();
+  dnaNumoris.backtraking(0, 0);
 
   return 0;
 }
