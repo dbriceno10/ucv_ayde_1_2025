@@ -6,7 +6,7 @@ using namespace std;
 template <typename T>
 class GenTree
 {
-// protected:
+  // protected:
 public:
   struct Node
   {
@@ -16,12 +16,12 @@ public:
     Node *parent;
     // Node(const T &d) : data(d), firstChild(nullptr), nextChild(nullptr), parent(nullptr) {}
     Node(const T &d, Node *n = nullptr) : data(d), firstChild(n), nextChild(n), parent(n) {}
-    Node *root;
-    int size; //*puede ser la cardinalidad o cantidad de nodos o niveles
   };
 
-  private:
+  Node *root;
+  int size; //*puede ser la cardinalidad o cantidad de nodos o niveles
 
+private:
   void deleteSubTree(Node *node)
   {
     if (!node) // node != nullptr
@@ -96,6 +96,14 @@ public:
     return root == nullptr;
   }
 
+  void Insert(T data)
+  {
+    if (IsEmpty())
+    {
+      root = new Node(T);
+    }
+  }
+
   void Insert(Node *newNode)
   {
     if (root == nullptr)
@@ -139,26 +147,34 @@ public:
     while (current->parent)
     {
       level++;
-      current = current->parent
+      current = current->parent;
     }
     return level;
+  }
+
+  void inorder(Node *nodo)
+  {
+    if (!nodo)
+      return;
+    inorder(nodo->firstChild);
+    cout << nodo->data << " ";
+    inorder(nodo->nextChild);
+  }
+
+  void recorrerInorder()
+  {
+    inorder(root);
+    cout << endl;
   }
 };
 
 int main(int argc, char const *argv[])
 {
   GenTree<string> Tree;
-
-  GenTree<string>::Node *grandpa = new GenTree<string>::Node("Abuelo"); // A
-  GenTree<string>::Node *father = new GenTree<string>::Node("Padre");   // B
-  GenTree<string>::Node *uncle = new GenTree<string>::Node("Tio");      // C
-  GenTree<string>::Node *child = new GenTree<string>::Node("Hijo");     // D
-
-  Tree.Insert(grandpa, father); // A,B
-  Tree.Insert(grandpa, uncle);  // A,C
-  Tree.Insert(father, child);   // B,D
+  Tree.Insert("A");
   // preorden -> A,B,D,C
   // inorden -> D,B,A,C
   // postorden -> D,B,C,A
+  Tree.recorrerInorder();
   return 0;
 }

@@ -73,6 +73,17 @@ string readInput()
   return dna;
 }
 
+string reverse(string str)
+{
+  string aux = "";
+  for (int i = str.length() - 1; i >= 0; i--)
+  {
+
+    aux += str[i];
+  }
+  return aux;
+}
+
 int factorial(int n)
 {
   if (n <= 1)
@@ -80,11 +91,11 @@ int factorial(int n)
   return n * factorial(n - 1);
 }
 
-bool include(string *array, string string, int size)
+bool include(string *array, string str, int size)
 {
   for (int i = 0; i < size; i++)
   {
-    if (array[i] == string)
+    if (array[i] == str || array[i] == reverse(str))
     {
       return true;
     }
@@ -171,6 +182,6 @@ int main(int argc, char const *argv[])
   c = nullptr;     // Avoid dangling pointer
   delete[] array;  // Free the allocated memory for permutations
   array = nullptr; // Avoid dangling pointer
-
+  cout << "original: " << dna << " reverse: " << reverse(dna) << endl;
   return 0;
 }

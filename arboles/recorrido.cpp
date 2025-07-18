@@ -9,7 +9,10 @@ class BST
     int valor;
     Nodo *izquierdo;
     Nodo *derecho;
-    Nodo(int val) : valor(val), izquierdo(nullptr), derecho(nullptr) {}
+    int altura;
+    // la altura se puede inicializar en 1 para el nodo raíz
+    //  o en 0 si se considera que un nodo hoja tiene altura 0
+    Nodo(int val) : valor(val), izquierdo(nullptr), derecho(nullptr), altura(1) {}
   };
 
   Nodo *raiz;
@@ -35,6 +38,34 @@ public:
     {
       nodo->derecho = insert(nodo->derecho, valor);
     }
+    nodo->altura = 1 + std::max(altura(nodo->izquierdo), altura(nodo->derecho));
+
+    int balanceAux = balance(nodo);
+
+    // Caso LL
+    if (balanceAux > 1 && valor < nodo->izquierdo->valor)
+    {
+      rotarDerecha(nodo); // LL
+    }
+
+    // Caso LR
+    if (balanceAux > 1 && valor > nodo->derecho->valor)
+    {
+      rotarDerecha(nodo); // RR
+    }
+
+    // Caso RR
+    if (balanceAux > 1 && valor > nodo->derecho->valor)
+    {
+      // rotarIzquierda(nodo); // RR
+    }
+
+    // Caso RL
+    if (balanceAux < -1 && valor > nodo->izquierdo->valor)
+    {
+      // rotarIzquierda(nodo); // LL
+    }
+
     return nodo;
   }
 
@@ -159,6 +190,38 @@ public:
     preorder(raiz);
     cout << endl;
   }
+
+  int altura(Nodo *nodo) const
+  {
+    if (!nodo)
+      return 0;
+    return nodo->altura;
+  }
+
+  int balance(Nodo *nodo)
+  {
+    if (!nodo)
+      return 0;
+    return altura(nodo->izquierdo) - altura(nodo->derecho);
+    // return altura(nodo->derecho) + altura(nodo->izquierdo); otra forma
+  }
+
+  //(LL)
+  Nodo *rotarDerecha(Nodo *x)
+  {
+    Nodo *y = x->derecho;   // el hijo derecho se convierte en el nuevo nodo raíz
+    Nodo *z = y->izquierdo; // el subarbol izquierdo
+
+    // rotar, el hijo se vuelve padre y el padre se vuelve hijo
+    y->izquierdo;
+    x->derecho = z; // el hijo derecho del padre ahora es el subarbol izquierdo
+
+    // x->altura = max(altura(x->izquierdo), altura(x->derecho)) + 1; // actualizar altura del padre
+    y->altura = 1 + std::max(altura(y->izquierdo), altura(y->derecho)); // actualizar altura del hijo
+    x->altura = 1 + std::max(altura(x->izquierdo), altura(x->derecho)); // actualizar altura del padre
+  }
+
+  //(RR) seria casi identico a rotarDerecha
 };
 
 int main()
