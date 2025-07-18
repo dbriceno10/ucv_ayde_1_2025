@@ -67,7 +67,7 @@ class DNA
       if (dna[i] == E)
       {
         nodes[i].maxLinks = 4;
-        nodes[i].type = M;
+        nodes[i].type = E;
         nodes[i].actualLinks = 0;
       }
       if (dna[i] == M)
@@ -88,23 +88,32 @@ class DNA
   bool canLink(const int &i, const int &j)
   {
     if (i == j)
-      return false;
-  }
+      return false; // un nodo no se puede enlazar consigo mismo
 
-  void printAdj()
-  {
-    cout << "here" << endl;
-    for (int i = 0; i < nNodes; i++)
+    // Contar enlaces actuales del nodo i y j
+    int countI = 0, countJ = 0;
+    for (int k = 0; k < nNodes; k++)
     {
-      cout << "|";
-      for (int j = 0; j < nNodes; j++)
+      if (adjMatrix[i][k])
       {
-        // cout << "(" << i << "," << j << "): " << " " << M[i][j] << " ";
-        cout << " " << adjMatrix[i][j] << " ";
+        // cout << "ik " << k << endl;
+        countI++;
       }
-      cout << "|" << endl;
+      if (adjMatrix[j][k])
+      {
+        // cout << "jk " << k << endl;
+        countJ++;
+      }
     }
-    cout << endl;
+
+    // // Obtener tipos de nodos
+    // char A = nodes[i].type;
+    // char B = nodes[j].type;
+
+    if (countI < nodes[i].maxLinks && countJ < nodes[j].maxLinks)
+      return true;
+
+    return false;
   }
 
   void deleteNodes()
@@ -126,8 +135,21 @@ public:
   {
     nNodes = strDna.size();
     dna = strDna;
-    nodes = new Node[nNodes];
     initializeAdjMatriz();
+    initializeNodes();
+    for (int i = 0; i < nNodes; i++)
+    {
+      for (int j = 0; j < nNodes; j++)
+      {
+        if (canLink(i, j))
+        {
+          adjMatrix[i][j] = true;
+          adjMatrix[j][i] = true;
+          // nodes[i].maxLinks++;
+          // nodes[j].maxLinks++;
+        }
+      }
+    }
   }
 
   ~DNA()
@@ -140,9 +162,38 @@ public:
     adjMatrix = nullptr;
   }
 
-  void PrintAdjMAtrix()
+  void printAdj()
   {
-    printAdj();
+    cout << "-------------------------\n";
+    cout << "    ";
+    for (int i = 0; i < nNodes; i++)
+    {
+      cout << "  " << i;
+    }
+    cout << endl;
+    cout << "-------------------------\n";
+    for (int i = 0; i < nNodes; i++)
+    {
+      cout << nodes[i].type << '(' << i << ')';
+      for (int j = 0; j < nNodes; j++)
+      {
+        // if (adjMatrix[i][j])
+        //   cout << j << "(" << nodes[j].type << ") ";
+        cout << "  " << adjMatrix[i][j];
+      }
+      cout << "\n";
+    }
+    cout << "-------------------------\n";
+  }
+
+  void printNodes()
+  {
+    for (int i = 0; i < nNodes; i++)
+    {
+      cout << "type: " << nodes[i].type << endl;
+      cout << "maxLinks: " << nodes[i].maxLinks << endl;
+      // cout << "actualLinks: " << nodes[i].actualLinks << endl;
+    }
   }
 };
 
@@ -218,7 +269,8 @@ int main(int argc, char const *argv[])
     return 0;
   }
   DNA dnaNumoris = DNA(dna);
-  dnaNumoris.PrintAdjMAtrix();
+  dnaNumoris.printAdj();
+  dnaNumoris.printNodes();
   // int n = dna.size();
   // char *c = new char[n + 1];
   // for (int i = 0; i < n; i++)
