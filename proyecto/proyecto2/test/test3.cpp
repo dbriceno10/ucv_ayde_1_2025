@@ -223,9 +223,9 @@ string readInput()
     {
       aux[i] = E;
     }
-    if (input[i] == 'h')
+    if (input[i] == 'm')
     {
-      aux[i] = H;
+      aux[i] = M;
     }
     if (input[i] == 'c')
     {
