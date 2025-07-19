@@ -161,8 +161,10 @@ class DNA
           printAdj();
         }
       }
+      // printAdj();
       return;
     }
+
     int nextI = i, nextJ = j + 1;
     if (nextJ == nNodes)
     {
@@ -170,13 +172,26 @@ class DNA
       nextJ = 0;
     }
 
+    // Solo recorrer la mitad superior de la matriz (evita duplicados)
+    if (j <= i)
+    {
+      testGraphs(nextI, nextJ);
+      return;
+    }
+
+    // Poda: si ya alcanzaron el máximo de enlaces, no probar este enlace
+    if (nodes[i].actualLinks >= nodes[i].maxLinks || nodes[j].actualLinks >= nodes[j].maxLinks)
+    {
+      testGraphs(nextI, nextJ);
+      return;
+    }
+
     // Opción 1: no marcar la casilla
     testGraphs(nextI, nextJ);
 
-    // Opción 2: marcar la casilla si no está marcada
+    // Opción 2: marcar la casilla si se puede
     if (canLink(i, j) && !isLinked(i, j))
     {
-
       adjMatrix[i][j] = true;
       adjMatrix[j][i] = true;
       nodes[i].actualLinks++;
