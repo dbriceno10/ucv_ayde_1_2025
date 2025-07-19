@@ -4,9 +4,11 @@
 using namespace std;
 
 char const H = 'H', E = 'E', M = 'M', C = 'C';
+int combinaciones = 0;
 
 class DNA
 {
+  // private:
   struct Node
   {
     char type;
@@ -130,6 +132,42 @@ class DNA
     delete[] adjMatrix;
   }
 
+  // backtraking
+  bool isLinked(const int &i, const int &j) const
+  {
+    return adjMatrix[i][j] && adjMatrix[j][i];
+  }
+
+  void testGraphs(int i, int j)
+  {
+    if (i == nNodes)
+    {
+
+      printAdj();
+      combinaciones++;
+      return;
+    }
+    int nextI = i, nextJ = j + 1;
+    if (nextJ == nNodes)
+    {
+      nextI++;
+      nextJ = 0;
+    }
+
+    // Opción 1: no marcar la casilla
+    testGraphs(nextI, nextJ);
+
+    // Opción 2: marcar la casilla si no está marcada
+    if (canLink(i, j) && !isLinked(i, j))
+    {
+      adjMatrix[i][j] = true;
+      adjMatrix[j][i] = true;
+      testGraphs(nextI, nextJ);
+      adjMatrix[i][j] = false;
+      adjMatrix[j][i] = false;
+    }
+  }
+
 public:
   DNA(string strDna)
   {
@@ -137,42 +175,6 @@ public:
     dna = strDna;
     initializeAdjMatriz();
     initializeNodes();
-    // for (int i = 0; i < nNodes; i++)
-    // {
-    //   for (int j = 0; j < nNodes; j++)
-    //   {
-    //     if (canLink(i, j))
-    //     {
-    //       adjMatrix[i][j] = true;
-    //       adjMatrix[j][i] = true;
-    //     }
-    //   }
-    // }
-  }
-
-  void backtraking(const int i, const int j)
-  {
-    if (i == nNodes - 1 && j == nNodes - 1)
-    {
-      printAdj();
-    }
-    for (int i = 0; i < nNodes; i++)
-    {
-      for (int j = 0; j < nNodes; j++)
-      {
-        if (canLink(i, j))
-        {
-          adjMatrix[i][j] = true;
-          adjMatrix[j][i] = true;
-        }
-        backtraking(i, j);
-        if (canLink(i, j))
-        {
-          adjMatrix[i][j] = false;
-          adjMatrix[j][i] = false;
-        }
-      }
-    }
   }
 
   ~DNA()
@@ -195,12 +197,12 @@ public:
     }
     cout << endl;
     cout << "    ";
-    cout << "    ";
     for (int i = 0; i < nNodes; i++)
     {
       cout << "  " << i;
     }
     cout << endl;
+    int enlaces = 0;
     cout << "-------------------------\n";
     for (int i = 0; i < nNodes; i++)
     {
@@ -208,10 +210,12 @@ public:
       for (int j = 0; j < nNodes; j++)
       {
         cout << "  " << adjMatrix[i][j];
+        enlaces += adjMatrix[i][j];
       }
       cout << "\n";
     }
     cout << "-------------------------\n";
+    cout << "combinacion # " << combinaciones + 1 << " nro de enlaces " << enlaces / 2 << endl;
   }
 
   void printNodes()
@@ -221,6 +225,27 @@ public:
       cout << "type: " << nodes[i].type << endl;
       cout << "maxLinks: " << nodes[i].maxLinks << endl;
     }
+  }
+
+  void backtracking()
+  {
+    testGraphs(0, 1);
+  }
+
+  void firstGraph()
+  {
+    for (int i = 0; i < nNodes; i++)
+    {
+      for (int j = 0; j < nNodes; j++)
+      {
+        if (canLink(i, j))
+        {
+          adjMatrix[i][j] = true;
+          adjMatrix[j][i] = true;
+        }
+      }
+    }
+    printAdj();
   }
 };
 
@@ -289,7 +314,8 @@ int main(int argc, char const *argv[])
   DNA dnaNumoris = DNA(dna);
   // dnaNumoris.printAdj();
   // dnaNumoris.printNodes();
-  dnaNumoris.backtraking(0, 0);
+  dnaNumoris.backtracking();
+  cout << "cantidad de combinaciones " << combinaciones << endl;
 
   return 0;
 }
