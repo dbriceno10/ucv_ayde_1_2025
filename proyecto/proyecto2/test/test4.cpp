@@ -93,6 +93,17 @@ class DNA
     if (i == j)
       return false; // un nodo no se puede enlazar consigo mismo
 
+    if ((nodes[i].actualLinks < nodes[i].maxLinks) && (nodes[j].actualLinks < nodes[j].maxLinks))
+      return true;
+
+    return false;
+  }
+
+  bool canLinkLegacy(const int &i, const int &j)
+  {
+    if (i == j)
+      return false; // un nodo no se puede enlazar consigo mismo
+
     // Contar enlaces actuales del nodo i y j
     int countI = 0, countJ = 0;
     for (int k = 0; k < nNodes; k++)
