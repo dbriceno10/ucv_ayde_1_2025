@@ -5,7 +5,6 @@ using namespace std;
 
 char const H = 'H', E = 'E', M = 'M', C = 'C';
 int combinaciones = 0;
-int globalMaxLinks = 0;
 
 class DNA
 {
@@ -39,6 +38,7 @@ class DNA
   Node *nodes;
   bool **adjMatrix;
   string dna;
+  int globalMaxLinks = 0;
 
   void initializeAdjMatriz()
   {
@@ -139,12 +139,28 @@ class DNA
     return adjMatrix[i][j] && adjMatrix[j][i];
   }
 
+  // este es el verdadero backtraking
   void testGraphs(int i, int j)
   {
     if (i == nNodes)
     {
-      printAdj();
-      combinaciones++;
+      const int auxLinks = getActualLinks();
+      if (globalMaxLinks == 0)
+      {
+        if (!isDisconnected())
+        {
+          globalMaxLinks = auxLinks;
+          printAdj();
+        }
+      }
+      else if (auxLinks >= globalMaxLinks)
+      {
+        if (!isDisconnected())
+        {
+          globalMaxLinks = auxLinks;
+          printAdj();
+        }
+      }
       return;
     }
     int nextI = i, nextJ = j + 1;
@@ -160,52 +176,78 @@ class DNA
     // Opción 2: marcar la casilla si no está marcada
     if (canLink(i, j) && !isLinked(i, j))
     {
+
       adjMatrix[i][j] = true;
       adjMatrix[j][i] = true;
+      nodes[i].actualLinks++;
+      nodes[j].actualLinks++;
       testGraphs(nextI, nextJ);
       adjMatrix[i][j] = false;
       adjMatrix[j][i] = false;
+      nodes[i].actualLinks--;
+      nodes[j].actualLinks--;
     }
   }
 
+  // Verifica si el grafo está desconectado (retorna true si hay algún nodo no alcanzable desde el nodo 0)
   bool isDisconnected()
   {
+    // Arreglo para marcar los nodos visitados
     bool *visited = new bool[nNodes];
     for (int i = 0; i < nNodes; i++)
-      visited[i] = false;
+    {
+      visited[i] = false; // Inicializa todos los nodos como no visitados
+    }
 
+    // Pila para realizar DFS (búsqueda en profundidad)
     int *stack = new int[nNodes];
     int top = 0;
 
-    visited[0] = true;
-    stack[top++] = 0;
+    // Comienza el recorrido desde el nodo 0
+    visited[0] = true; // Marca el nodo 0 como visitado
+    stack[top++] = 0;  // Agrega el nodo 0 a la pila
 
+    // Recorrido DFS iterativo
     while (top > 0)
     {
-      int u = stack[--top];
+      int u = stack[--top]; // Saca un nodo de la pila
       for (int v = 0; v < nNodes; v++)
       {
+        // Si hay una arista y el nodo v no ha sido visitado
         if (adjMatrix[u][v] && !visited[v])
         {
-          visited[v] = true;
-          stack[top++] = v;
+          visited[v] = true; // Marca el nodo como visitado
+          stack[top++] = v;  // Agrega el nodo a la pila para seguir el recorrido
         }
       }
     }
 
+    // Verifica si hay algún nodo no visitado
     for (int i = 0; i < nNodes; i++)
     {
       if (!visited[i])
       {
+        // Si encuentra un nodo no visitado, el grafo está desconectado
         delete[] visited;
         delete[] stack;
         return true;
       }
     }
 
+    // Si todos los nodos fueron visitados, el grafo está conectado
     delete[] visited;
     delete[] stack;
     return false;
+  }
+
+  int getActualLinks() const
+  {
+    int links = 0;
+    for (int i = 0; i < nNodes; i++)
+    {
+      links += nodes[i].actualLinks;
+    }
+    return links / 2;
   }
 
 public:
@@ -255,20 +297,7 @@ public:
       cout << "\n";
     }
     cout << "-------------------------\n";
-    if (globalMaxLinks == 0)
-    {
-      globalMaxLinks = enlaces / 2;
-    }
-    if (enlaces / 2 > globalMaxLinks)
-    {
-      globalMaxLinks = enlaces / 2;
-    }
-    cout << "combinacion # " << combinaciones + 1 << " nro de enlaces " << enlaces / 2 << endl;
-    bool disconected = isDisconnected();
-    if (disconected)
-    {
-      cout << "Esta opcion es disconexa" << endl;
-    }
+    cout << "#" << ++combinaciones << " enlaces: " << getActualLinks() << endl;
   }
 
   void printNodes()
@@ -282,7 +311,7 @@ public:
 
   void backtracking()
   {
-    testGraphs(0, 1);
+    testGraphs(0, 0);
   }
 
   void firstGraph()
@@ -295,10 +324,17 @@ public:
         {
           adjMatrix[i][j] = true;
           adjMatrix[j][i] = true;
+          nodes[i].actualLinks++;
+          nodes[j].actualLinks++;
         }
       }
     }
     printAdj();
+  }
+
+  int getGlobalMaxLikns() const
+  {
+    return globalMaxLinks;
   }
 };
 
@@ -369,7 +405,7 @@ int main(int argc, char const *argv[])
   // dnaNumoris.printNodes();
   // dnaNumoris.firstGraph();
   dnaNumoris.backtracking();
-  cout << "cantidad de combinaciones " << combinaciones << " maximo global de combinaciones " << globalMaxLinks << endl;
+  cout << "cantidad de combinaciones " << combinaciones << " maximo global de enlaces " << dnaNumoris.getGlobalMaxLikns() << endl;
 
   return 0;
 }
