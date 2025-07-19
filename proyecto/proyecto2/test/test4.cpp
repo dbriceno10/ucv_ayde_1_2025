@@ -5,6 +5,7 @@ using namespace std;
 
 char const H = 'H', E = 'E', M = 'M', C = 'C';
 int combinaciones = 0;
+int globalMaxLinks = 0;
 
 class DNA
 {
@@ -142,7 +143,6 @@ class DNA
   {
     if (i == nNodes)
     {
-
       printAdj();
       combinaciones++;
       return;
@@ -166,6 +166,46 @@ class DNA
       adjMatrix[i][j] = false;
       adjMatrix[j][i] = false;
     }
+  }
+
+  bool isDisconnected()
+  {
+    bool *visited = new bool[nNodes];
+    for (int i = 0; i < nNodes; i++)
+      visited[i] = false;
+
+    int *stack = new int[nNodes];
+    int top = 0;
+
+    visited[0] = true;
+    stack[top++] = 0;
+
+    while (top > 0)
+    {
+      int u = stack[--top];
+      for (int v = 0; v < nNodes; v++)
+      {
+        if (adjMatrix[u][v] && !visited[v])
+        {
+          visited[v] = true;
+          stack[top++] = v;
+        }
+      }
+    }
+
+    for (int i = 0; i < nNodes; i++)
+    {
+      if (!visited[i])
+      {
+        delete[] visited;
+        delete[] stack;
+        return true;
+      }
+    }
+
+    delete[] visited;
+    delete[] stack;
+    return false;
   }
 
 public:
@@ -215,7 +255,20 @@ public:
       cout << "\n";
     }
     cout << "-------------------------\n";
+    if (globalMaxLinks == 0)
+    {
+      globalMaxLinks = enlaces / 2;
+    }
+    if (enlaces / 2 > globalMaxLinks)
+    {
+      globalMaxLinks = enlaces / 2;
+    }
     cout << "combinacion # " << combinaciones + 1 << " nro de enlaces " << enlaces / 2 << endl;
+    bool disconected = isDisconnected();
+    if (disconected)
+    {
+      cout << "Esta opcion es disconexa" << endl;
+    }
   }
 
   void printNodes()
@@ -314,8 +367,9 @@ int main(int argc, char const *argv[])
   DNA dnaNumoris = DNA(dna);
   // dnaNumoris.printAdj();
   // dnaNumoris.printNodes();
+  // dnaNumoris.firstGraph();
   dnaNumoris.backtracking();
-  cout << "cantidad de combinaciones " << combinaciones << endl;
+  cout << "cantidad de combinaciones " << combinaciones << " maximo global de combinaciones " << globalMaxLinks << endl;
 
   return 0;
 }
