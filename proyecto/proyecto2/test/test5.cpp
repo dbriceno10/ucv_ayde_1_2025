@@ -165,6 +165,7 @@ class DNA
       if (!isDisconnected())
       {
         solutions++;
+        // if (solutions == 4)
         printAdj();
       }
 
@@ -280,17 +281,21 @@ class DNA
       int fileEnergy = 0;
       for (int j = 0; j < nNodes; j++)
       {
-        // descartamos la diagonal principal
-        if (i == j)
-        {
+        if (nodes[i].type == H)
           continue;
-        }
+
+        // descartamos la diagonal principal
+        if (i == j || !adjMatrix[i][j])
+          continue;
+
         // contamos los nodos E
+        cout << "nodo I " << nodes[i].type << "(" << i << ")" << " nodo J " << nodes[j].type << "(" << j << ")" << endl;
         if (nodes[i].type == E && nodes[j].type == E)
         {
           counterE++;
         }
-        if ((nodes[i].type == E || nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
+        // if ((nodes[i].type == E || nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
+        if ((nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
         {
           fileEnergy++;
         }
