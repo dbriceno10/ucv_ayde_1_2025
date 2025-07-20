@@ -5,6 +5,74 @@ using namespace std;
 
 char const H = 'H', E = 'E', M = 'M', C = 'C';
 
+// La intencion de esta "pila" limitada, es poder guardar los indices de un camino, no deberia nunca sobrepasar la cantidad de nodos ingresados, la idea es tener un historial
+class historyDNA
+{
+  int maxSize;
+  int top;
+  int *stack;
+  int size;
+
+public:
+  historyDNA(int size) : maxSize(size)
+  {
+    stack = new int[size * 2];
+    top = -1;
+    size = 0;
+  }
+
+  ~historyDNA()
+  {
+    delete[] stack;
+    maxSize = 0;
+    top = -1;
+    size = 0;
+  }
+
+  bool isEmpty() const
+  {
+    return size == 0;
+  }
+
+  void push(const int &value)
+  {
+    if (size + 1 > maxSize)
+    {
+      cout << "limite de la pila alcanzado, no puede agregar mas elementos" << endl;
+    }
+    if (top >= 0)
+    {
+      top++;
+      stack[top] = value;
+      size++;
+    }
+    else
+    {
+      top = 0;
+      size = 1;
+      stack[top] = value;
+    }
+  }
+
+  int pop()
+  {
+    if (isEmpty())
+      return -1;
+
+    if (top > 0)
+    {
+      int aux = stack[top];
+      top--;
+      size--;
+      return aux;
+    }
+    int aux = stack[top];
+    top = -1;
+    size = 0;
+    return aux;
+  }
+};
+
 class DNA
 {
   // private:
@@ -159,15 +227,17 @@ class DNA
       if (!isDisconnected())
       {
         solutions++;
-        if (solutions == 4)
-        {
-          printAdj();
-          // for (int i = 0; i < nNodes; i++)
-          // {
-          //   startFromNode(i);
-          // }
-          detectAndClassifyCycles();
-        }
+        // if (solutions == 4)
+        // {
+        // printAdj();
+        // startFromNode(0);
+        // for (int i = 0; i < nNodes; i++)
+        // {
+        //   startFromNode(i);
+        // }
+        detectAndClassifyCycles();
+        // cout << "Energia del sistema " <<  getEnergySystem()<< endl;
+        // }
       }
 
       return;
@@ -322,9 +392,9 @@ class DNA
         }
       }
       energy += fileEnergy;
-      cout << "fileEnery: " << fileEnergy << endl;
+      // cout << "fileEnery: " << fileEnergy << endl;
     }
-    cout << "the energy is: " << energy << endl;
+    // cout << "the energy is: " << energy << endl;
     return energy / 2;
   }
 
@@ -359,6 +429,8 @@ class DNA
 
     for (int i = 0; i < nNodes; i++)
     {
+      if (nodes[i].type == H)
+        continue;
       for (int j = i + 1; j < nNodes; j++)
       {
         if (!adjMatrix[i][j])
@@ -371,13 +443,11 @@ class DNA
           char ti = nodes[i].type;
           char tj = nodes[j].type;
           char tk = nodes[k].type;
+          if (ti == H || tj == H || tk == H)
+            continue;
 
           // Determinar el tipo de ciclo
-          if (ti == E && tj == E && tk == E)
-          {
-            cout << "Ciclo tipo E-E-E entre nodos: " << i << ", " << j << ", " << k << " (triplica energía)\n";
-          }
-          else if ((ti == C && tj == C && tk == C) || (ti == M && tj == M && tk == M))
+          if ((ti == E && tj == E && tk == E) || (ti == C && tj == C && tk == C) || (ti == M && tj == M && tk == M))
           {
             cout << "Ciclo homogéneo (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (triplica energía)\n";
           }
@@ -544,6 +614,18 @@ int main(int argc, char const *argv[])
   DNA dnaNumoris = DNA(dna);
   dnaNumoris.backtracking();
   cout << "cantidad de combinaciones " << dnaNumoris.getSolutions() << endl;
+
+  // historyDNA stack = historyDNA(dna.size());
+
+  // for (int i = 0; i < dna.size(); i++)
+  // {
+  //   cout << "push " << 50 + i << endl;
+  //   stack.push(50 + i);
+  // }
+  // for (int i = 0; i < dna.size(); i++)
+  // {
+  //   cout << "pop " << stack.pop() << endl;
+  // }
 
   return 0;
 }
