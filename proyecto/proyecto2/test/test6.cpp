@@ -5,77 +5,115 @@ using namespace std;
 
 char const H = 'H', E = 'E', M = 'M', C = 'C';
 
-// La intencion de esta "pila" limitada, es poder guardar los indices de un camino, no deberia nunca sobrepasar la cantidad de nodos ingresados, la idea es tener un historial
-class historyDNA
-{
-  int maxSize;
-  int top;
-  int *stack;
-  int size;
-
-public:
-  historyDNA(int size) : maxSize(size)
-  {
-    stack = new int[size * 2];
-    top = -1;
-    size = 0;
-  }
-
-  ~historyDNA()
-  {
-    delete[] stack;
-    maxSize = 0;
-    top = -1;
-    size = 0;
-  }
-
-  bool isEmpty() const
-  {
-    return size == 0;
-  }
-
-  void push(const int &value)
-  {
-    if (size + 1 > maxSize)
-    {
-      cout << "limite de la pila alcanzado, no puede agregar mas elementos" << endl;
-    }
-    if (top >= 0)
-    {
-      top++;
-      stack[top] = value;
-      size++;
-    }
-    else
-    {
-      top = 0;
-      size = 1;
-      stack[top] = value;
-    }
-  }
-
-  int pop()
-  {
-    if (isEmpty())
-      return -1;
-
-    if (top > 0)
-    {
-      int aux = stack[top];
-      top--;
-      size--;
-      return aux;
-    }
-    int aux = stack[top];
-    top = -1;
-    size = 0;
-    return aux;
-  }
-};
-
 class DNA
 {
-  // private:
+  template <typename T>
+  class historyDNA
+  {
+  protected:
+    struct Node
+    {
+      T data;
+      Node *next;
+      Node(const T &d, Node *n = nullptr) : data(d), next(n) {}
+    };
+
+    Node *topNode; // Puntero al tope
+    int count;     // Contador de elementos
+  public:
+    // Constructor
+    historyDNA() : topNode(nullptr), count(0) {}
+
+    // Destructor
+    ~historyDNA()
+    {
+      Clear();
+    }
+
+    // Vacía la pila
+    void Clear()
+    {
+      while (!IsEmpty())
+      {
+        Pop();
+      }
+      topNode = nullptr;
+      count = 0;
+    }
+
+    // Verifica si está vacía
+    bool IsEmpty() const
+    {
+      return count == 0;
+    }
+
+    // Agrega elemento al tope
+    void Push(const T &x)
+    {
+      topNode = new Node(x, topNode);
+      count++;
+    }
+
+    // Elimina el elemento del tope
+    void Pop()
+    {
+      // if (IsEmpty())
+      // {
+      //   cout << "Pila vacía" << endl;
+      // }
+      Node *temp = topNode;
+      topNode = topNode->next;
+      delete temp;
+      count--;
+    }
+
+    // Tamaño de la pila
+    int Size() const
+    {
+      return count;
+    }
+
+    // Acceso al elemento tope
+    T Top() const
+    {
+      // if (IsEmpty())
+      // {
+      //   cout << "Pila vacía" << endl;
+      // }
+      return topNode->data;
+    }
+
+    bool Include(T element)
+    {
+      if (IsEmpty())
+        return false;
+      bool flag = false;
+      Node *current = topNode;
+      while (current && !flag)
+      {
+        if (current->data == element)
+        {
+          flag = true;
+        }
+        else
+        {
+          current = current->next;
+        }
+      }
+      return flag;
+    }
+
+    void PrintAll()
+    {
+      Node *current = topNode;
+      while (current)
+      {
+        cout << current->data << endl;
+        current = current->next;
+      }
+    }
+  };
+
   struct Node
   {
     char type;
@@ -98,6 +136,47 @@ class DNA
         maxLinks = 2;
       else if (t == C)
         maxLinks = 2;
+    }
+  };
+
+  struct Cycle
+  {
+    string cycle;
+    int multiplier;
+  };
+
+  class CycleList : public historyDNA<Cycle>
+  {
+  public:
+    bool Find(string element, Cycle &cycle)
+    {
+      if (IsEmpty())
+        return false;
+      bool flag = false;
+      Node *current = topNode;
+      while (current && !flag)
+      {
+        if (current->data.cycle == element)
+        {
+          flag = true;
+          cycle.cycle = current->data.cycle;
+          cycle.multiplier = current->data.multiplier;
+        }
+        else
+        {
+          current = current->next;
+        }
+      }
+      return flag;
+    }
+    void PrintAll()
+    {
+      Node *current = topNode;
+      while (current)
+      {
+        cout << current->data.cycle << endl;
+        current = current->next;
+      }
     }
   };
 
@@ -227,17 +306,23 @@ class DNA
       if (!isDisconnected())
       {
         solutions++;
-        // if (solutions == 4)
-        // {
-        // printAdj();
-        // startFromNode(0);
-        // for (int i = 0; i < nNodes; i++)
-        // {
-        //   startFromNode(i);
-        // }
-        detectAndClassifyCycles();
-        // cout << "Energia del sistema " <<  getEnergySystem()<< endl;
-        // }
+        if (solutions == 4)
+        {
+          // printAdj();
+          // startFromNode(0);
+          // for (int i = 0; i < nNodes; i++)
+          // {
+          //   startFromNode(i);
+          // }
+          CycleList cicles;
+          detectAndClassifyCycles(cicles);
+          // cicles.PrintAll();
+          // cout << "Esta vacia? " << (cicles.IsEmpty() ? "SI" : "NO") << endl;
+          // Cycle cycle;
+          // cout << "2-3-4 esta? " << (cicles.Find("2-3-4", cycle) ? "SI" : "NO") << endl;
+          // cout << "Energia del sistema " <<  getEnergySystem()<< endl;
+          getEnergySystem();
+        }
       }
 
       return;
@@ -359,38 +444,38 @@ class DNA
         if (i == j || !adjMatrix[i][j])
           continue;
 
-        // contamos los nodos E
-        cout << "nodo I " << nodes[i].type << "(" << i << ")" << " nodo J " << nodes[j].type << "(" << j << ")" << endl;
-        if (nodes[i].type == E && nodes[j].type == E)
-        {
-          counterE++;
-        }
-        // if ((nodes[i].type == E || nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
-        if ((nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
-        {
-          fileEnergy++;
-        }
-        if (nodes[i].type == C && nodes[j].type != H)
-        {
-          fileEnergy--;
-        }
+        // // contamos los nodos E
+        // cout << "nodo I " << nodes[i].type << "(" << i << ")" << " nodo J " << nodes[j].type << "(" << j << ")" << endl;
+        // if (nodes[i].type == E && nodes[j].type == E)
+        // {
+        //   counterE++;
+        // }
+        // // if ((nodes[i].type == E || nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
+        // if ((nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
+        // {
+        //   fileEnergy++;
+        // }
+        // if (nodes[i].type == C && nodes[j].type != H)
+        // {
+        //   fileEnergy--;
+        // }
       }
-      if (nodes[i].type == E && counterE > 0)
-      {
-        while (counterE > 0)
-        {
-          if (counterE > 1)
-          {
-            counterE = counterE - 2;
-            fileEnergy += 2 * 3;
-          }
-          else
-          {
-            fileEnergy++;
-            counterE--;
-          }
-        }
-      }
+      // if (nodes[i].type == E && counterE > 0)
+      // {
+      //   while (counterE > 0)
+      //   {
+      //     if (counterE > 1)
+      //     {
+      //       counterE = counterE - 2;
+      //       fileEnergy += 2 * 3;
+      //     }
+      //     else
+      //     {
+      //       fileEnergy++;
+      //       counterE--;
+      //     }
+      //   }
+      // }
       energy += fileEnergy;
       // cout << "fileEnery: " << fileEnergy << endl;
     }
@@ -423,7 +508,7 @@ class DNA
     delete[] visited;
   }
 
-  void detectAndClassifyCycles()
+  void detectAndClassifyCycles(CycleList &list)
   {
     cout << "\n--- Detectando y clasificando ciclos de 3 nodos ---\n";
 
@@ -447,9 +532,16 @@ class DNA
             continue;
 
           // Determinar el tipo de ciclo
+          string aux = to_string(i) + "-" + to_string(j) + "-" + to_string(k);
+          Cycle cycle;
+          cycle.cycle = aux;
+          cycle.multiplier = 1;
           if ((ti == E && tj == E && tk == E) || (ti == C && tj == C && tk == C) || (ti == M && tj == M && tk == M))
           {
             cout << "Ciclo homogéneo (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (triplica energía)\n";
+            cycle.multiplier = 3;
+            list.Push(cycle);
+            cout << "hicimos push de " << cycle.cycle << endl;
           }
           else if ((ti == C || ti == M || ti == E) &&
                    (tj == C || tj == M || tj == E) &&
@@ -457,6 +549,8 @@ class DNA
                    (ti != tj || tj != tk || ti != tk)) // Al menos 2 diferentes
           {
             cout << "Ciclo mixto (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (duplica energía)\n";
+            cycle.multiplier = 2;
+            list.Push(cycle);
           }
           else
           {
@@ -547,6 +641,24 @@ public:
   {
     return solutions;
   }
+
+  void testStack()
+  {
+    historyDNA<int> stack;
+
+    for (int i = 0; i < 20; i++)
+    {
+      cout << "push " << i + 1 << endl;
+      stack.Push(i + 1);
+    }
+    cout << "esta el 15? " << (stack.Include(15) ? "SI" : "NO") << endl;
+    cout << "esta el 30? " << (stack.Include(30) ? "SI" : "NO") << endl;
+    for (int i = 0; i < 20; i++)
+    {
+      cout << "pop " << stack.Top() << endl;
+      stack.Pop();
+    }
+  }
 };
 
 bool isDigit(char c)
@@ -614,6 +726,7 @@ int main(int argc, char const *argv[])
   DNA dnaNumoris = DNA(dna);
   dnaNumoris.backtracking();
   cout << "cantidad de combinaciones " << dnaNumoris.getSolutions() << endl;
+  // dnaNumoris.testStack();
 
   // historyDNA stack = historyDNA(dna.size());
 
