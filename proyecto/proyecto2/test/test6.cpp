@@ -162,6 +162,11 @@ class DNA
         if (solutions == 4)
         {
           printAdj();
+          // for (int i = 0; i < nNodes; i++)
+          // {
+          //   startFromNode(i);
+          // }
+          detectAndClassifyCycles();
         }
       }
 
@@ -344,8 +349,52 @@ class DNA
     for (int i = 0; i < nNodes; i++)
       visited[i] = false;
     cout << "Iniciando recorrido DFS desde nodo " << nodes[indexNode].type << "(" << indexNode << ")" << endl;
-    dfsDNA(0, visited);
+    dfsDNA(indexNode, visited);
     delete[] visited;
+  }
+
+  void detectAndClassifyCycles()
+  {
+    cout << "\n--- Detectando y clasificando ciclos de 3 nodos ---\n";
+
+    for (int i = 0; i < nNodes; i++)
+    {
+      for (int j = i + 1; j < nNodes; j++)
+      {
+        if (!adjMatrix[i][j])
+          continue;
+        for (int k = j + 1; k < nNodes; k++)
+        {
+          if (!adjMatrix[i][k] || !adjMatrix[j][k])
+            continue;
+
+          char ti = nodes[i].type;
+          char tj = nodes[j].type;
+          char tk = nodes[k].type;
+
+          // Determinar el tipo de ciclo
+          if (ti == E && tj == E && tk == E)
+          {
+            cout << "Ciclo tipo E-E-E entre nodos: " << i << ", " << j << ", " << k << " (triplica energía)\n";
+          }
+          else if ((ti == C && tj == C && tk == C) || (ti == M && tj == M && tk == M))
+          {
+            cout << "Ciclo homogéneo (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (triplica energía)\n";
+          }
+          else if ((ti == C || ti == M || ti == E) &&
+                   (tj == C || tj == M || tj == E) &&
+                   (tk == C || tk == M || tk == E) &&
+                   (ti != tj || tj != tk || ti != tk)) // Al menos 2 diferentes
+          {
+            cout << "Ciclo mixto (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (duplica energía)\n";
+          }
+          else
+          {
+            cout << "Ciclo (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (sin efecto especial)\n";
+          }
+        }
+      }
+    }
   }
 
 public:
