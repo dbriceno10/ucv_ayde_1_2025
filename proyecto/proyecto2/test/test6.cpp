@@ -357,18 +357,17 @@ class DNA
           //   startFromNode(i);
           // }
           CycleList cicles;
-          detectAndClassifyCycles(cicles);
-          // cicles.PrintAll();
-          // cout << "Esta vacia? " << (cicles.IsEmpty() ? "SI" : "NO") << endl;
-          // Cycle cycle;
-          // cout << "2-3-4 esta? " << (cicles.Find("2-3-4", cycle) ? "SI" : "NO") << endl;
-          // cout << "Energia del sistema " <<  getEnergySystem()<< endl;
-          int e = getEnergySystem(cicles);
-          cout << "energia bruta " << e << endl;
+          detectAndClassifyCycles(adjMatrix, cicles);
+          int e = getEnergySystem(adjMatrix, cicles);
+          cout << "energia bruta de sistema " << e << endl;
           findLongestPath();
           bool **longestMatrix;
           buildLongestPathMatrix(longestMatrix);
           printSubAdj(longestMatrix);
+          CycleList ciclesLongest;
+          detectAndClassifyCycles(longestMatrix, ciclesLongest);
+          int eLongest = getEnergySystem(longestMatrix, cicles);
+          cout << "energia del camino mas largo " << eLongest << endl;
           deleteSubMatrix(longestMatrix);
         }
       }
@@ -482,7 +481,7 @@ class DNA
     return links / 2;
   }
 
-  int getEnergySystem(const CycleList &list) const
+  int getEnergySystem(bool **adjMatrix, const CycleList &list) const
   {
     int energy = 0;
     for (int i = 0; i < nNodes; i++)
@@ -588,7 +587,7 @@ class DNA
     delete[] visited;
   }
 
-  void detectAndClassifyCycles(CycleList &list)
+  void detectAndClassifyCycles(bool **adjMatrix, CycleList &list)
   {
     cout << "\n--- Detectando y clasificando ciclos de 3 nodos ---\n";
 
