@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cmath>
 
 using namespace std;
 
@@ -118,18 +119,6 @@ class DNA
         current = current->next;
       }
     }
-
-    void Next(tPosition node)
-    {
-      if (node->next)
-      {
-        node = node->next;
-      }
-      else
-      {
-        node = nullptr;
-      }
-    }
   };
 
   struct Node
@@ -224,8 +213,10 @@ class DNA
   Node *nodes;
   bool **adjMatrix;
   string dna;
-  int globalMaxLinks = 0;
   int solutions = 0;
+  int bestSolution = 0;
+  int bestEnergy = 0;
+  int bestUsefullLife = 0;
 
   void initializeAdjMatriz()
   {
@@ -350,32 +341,47 @@ class DNA
         solutions++;
         // if (solutions == 4)
         // {
-        printAdj();
-        // startFromNode(0);
-        // for (int i = 0; i < nNodes; i++)
-        // {
-        //   startFromNode(i);
-        // }
+        // printAdj(adjMatrix, true);
         CycleList cicles;
         detectAndClassifyCycles(adjMatrix, cicles);
-        int e = getEnergySystem(adjMatrix, cicles);
-        cout << "energia bruta de sistema " << e << endl;
-        findLongestPath();
+        int eSystem = getEnergySystem(adjMatrix, cicles);
+        // cout << "energia bruta de sistema " << eSystem << endl;
         bool **longestMatrix;
-        buildLongestPathMatrix(longestMatrix);
-        printSubAdj(longestMatrix);
+        const int nNodosPath = buildLongestPathMatrix(longestMatrix);
+        // printAdj(longestMatrix);
         CycleList ciclesLongest;
         detectAndClassifyCycles(longestMatrix, ciclesLongest);
         int eLongest = getEnergySystem(longestMatrix, cicles);
-        cout << "energia del camino mas largo " << eLongest << endl;
+        // cout << "energia del camino mas largo " << eLongest << " y tuvo " << nNodosPath << " nodos" << endl;
         deleteSubMatrix(longestMatrix);
+        int usefullLife = abs(eSystem * eLongest * nNodosPath * 10);
+        // cout << "Solucion #" << solutions << " energia: " << eSystem << " vida util: " << usefullLife << endl;
+        if (bestSolution == 0)
+        {
+          bestSolution = solutions;
+          bestEnergy = eSystem;
+          bestUsefullLife = usefullLife;
+        }
+        else
+        {
+          if (eSystem > bestEnergy)
+          {
+            bestSolution = solutions;
+            bestEnergy = eSystem;
+            bestUsefullLife = usefullLife;
+          }
+          else if (eSystem == bestEnergy)
+          {
+            if (usefullLife > bestUsefullLife)
+            {
+              bestSolution = solutions;
+              bestEnergy = eSystem;
+              bestUsefullLife = usefullLife;
+            }
+          }
+        }
         // }
       }
-      else
-      {
-        cout << "se descarto una opcion por se disconexo" << endl;
-      }
-
       return;
     }
 
@@ -432,48 +438,42 @@ class DNA
     bool *visited = new bool[nNodes];
     for (int i = 0; i < nNodes; i++)
     {
-      visited[i] = false; // Inicializa todos los nodos como no visitados
+      visited[i] = false;
     }
 
-    // Pila para realizar DFS (búsqueda en profundidad)
-    int *stack = new int[nNodes];
-    int top = 0;
+    // Usamos tu pila personalizada
+    historyDNA<int> stack;
 
-    // Comienza el recorrido desde el nodo 0
-    visited[0] = true; // Marca el nodo 0 como visitado
-    stack[top++] = 0;  // Agrega el nodo 0 a la pila
+    visited[0] = true; // Empezamos desde el nodo 0
+    stack.Push(0);
 
-    // Recorrido DFS iterativo
-    while (top > 0)
+    while (!stack.IsEmpty())
     {
-      int u = stack[--top]; // Saca un nodo de la pila
+      int u = stack.Top();
+      stack.Pop();
+
       for (int v = 0; v < nNodes; v++)
       {
-        // Si hay una arista y el nodo v no ha sido visitado
         if (adjMatrix[u][v] && !visited[v])
         {
-          visited[v] = true; // Marca el nodo como visitado
-          stack[top++] = v;  // Agrega el nodo a la pila para seguir el recorrido
+          visited[v] = true;
+          stack.Push(v);
         }
       }
     }
 
-    // Verifica si hay algún nodo no visitado
+    // Verificamos si quedó algún nodo sin visitar
     for (int i = 0; i < nNodes; i++)
     {
       if (!visited[i])
       {
-        // Si encuentra un nodo no visitado, el grafo está desconectado
         delete[] visited;
-        delete[] stack;
-        return true;
+        return true; // Hay al menos un nodo no conectado
       }
     }
 
-    // Si todos los nodos fueron visitados, el grafo está conectado
     delete[] visited;
-    delete[] stack;
-    return false;
+    return false; // Todos fueron visitados, el grafo es conexo
   }
 
   int getActualLinks() const
@@ -567,35 +567,8 @@ class DNA
     return energy;
   }
 
-  void dfsDNA(int u, bool *visited)
-  {
-    visited[u] = true;
-
-    cout << "Visitando nodo " << nodes[u].type << "(" << u << ")" << endl;
-
-    for (int v = 0; v < nNodes; v++)
-    {
-      if (adjMatrix[u][v] && !visited[v])
-      {
-        dfsDNA(v, visited);
-      }
-    }
-  }
-
-  void startFromNode(int indexNode)
-  {
-    bool *visited = new bool[nNodes];
-    for (int i = 0; i < nNodes; i++)
-      visited[i] = false;
-    cout << "Iniciando recorrido DFS desde nodo " << nodes[indexNode].type << "(" << indexNode << ")" << endl;
-    dfsDNA(indexNode, visited);
-    delete[] visited;
-  }
-
   void detectAndClassifyCycles(bool **adjMatrix, CycleList &list)
   {
-    cout << "\n--- Detectando y clasificando ciclos de 3 nodos ---\n";
-
     for (int i = 0; i < nNodes; i++)
     {
       if (nodes[i].type == H)
@@ -622,7 +595,6 @@ class DNA
           cycle.multiplier = 1;
           if ((ti == E && tj == E && tk == E) || (ti == C && tj == C && tk == C) || (ti == M && tj == M && tk == M))
           {
-            cout << "Ciclo homogéneo (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (triplica energía)\n";
             cycle.multiplier = 3;
             list.Push(cycle);
           }
@@ -631,37 +603,18 @@ class DNA
                    (tk == C || tk == M || tk == E) &&
                    (ti != tj || tj != tk || ti != tk)) // Al menos 2 diferentes
           {
-            cout << "Ciclo mixto (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (duplica energía)\n";
             cycle.multiplier = 2;
             list.Push(cycle);
           }
           else
           {
-            cout << "Ciclo (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (sin efecto especial)\n";
+            // si se forma un ciclo entre nodos distintos
             cycle.multiplier = 2;
             list.Push(cycle);
           }
         }
       }
     }
-  }
-
-  void findLongestPath()
-  {
-    bool *visited = new bool[nNodes];
-    historyDNA<int> longestPath;
-
-    for (int i = 0; i < nNodes; i++)
-    {
-      for (int v = 0; v < nNodes; v++)
-        visited[v] = false;
-      historyDNA<int> currentPath;
-      dfsLongestPath(i, visited, currentPath, longestPath);
-    }
-
-    cout << "Camino más largo encontrado (" << longestPath.Size() << " nodos):\n";
-    longestPath.PrintAll();
-    delete[] visited;
   }
 
   void dfsLongestPath(int u, bool *visited, historyDNA<int> &currentPath, historyDNA<int> &longestPath)
@@ -701,36 +654,7 @@ class DNA
     visited[u] = false;
   }
 
-  void printSubAdj(bool **adjMatrix)
-  {
-    // printNodes();
-    cout << "-------------------------\n";
-    cout << "    ";
-    for (int i = 0; i < nNodes; i++)
-    {
-      cout << "  " << nodes[i].type;
-    }
-    cout << endl;
-    cout << "    ";
-    for (int i = 0; i < nNodes; i++)
-    {
-      cout << "  " << i;
-    }
-    cout << endl;
-    cout << "-------------------------\n";
-    for (int i = 0; i < nNodes; i++)
-    {
-      cout << nodes[i].type << '(' << i << ')';
-      for (int j = 0; j < nNodes; j++)
-      {
-        cout << "  " << adjMatrix[i][j];
-      }
-      cout << "\n";
-    }
-    cout << "-------------------------\n";
-  }
-
-  void buildLongestPathMatrix(bool **&longestMatrix)
+  int buildLongestPathMatrix(bool **&longestMatrix)
   {
     bool *visited = new bool[nNodes];
     historyDNA<int> longestPath;
@@ -757,8 +681,8 @@ class DNA
       longestMatrix[v][u] = true;
       p = p->next;
     }
-
     delete[] visited;
+    return longestPath.Size();
   }
 
   void initializeSubMatrix(bool **&subAdjMatrix)
@@ -786,28 +710,7 @@ class DNA
     delete[] subAdjMatrix;
   }
 
-public:
-  DNA(string strDna)
-  {
-    nNodes = strDna.size();
-    dna = strDna;
-    initializeAdjMatriz();
-    initializeNodes();
-  }
-
-  ~DNA()
-  {
-    deleteNodes();
-    deleteAdjMatrix();
-    dna = "";
-    nNodes = 0;
-    nodes = nullptr;
-    adjMatrix = nullptr;
-    globalMaxLinks = 0;
-    solutions = 0;
-  }
-
-  void printAdj()
+  void printAdj(bool **adjMatrix, bool printSolutions = false)
   {
     // printNodes();
     cout << "-------------------------\n";
@@ -834,21 +737,37 @@ public:
       cout << "\n";
     }
     cout << "-------------------------\n";
-    cout << "#" << solutions << " enlaces: " << getActualLinks() << endl;
+    if (printSolutions)
+    {
+      cout << "#" << solutions << " enlaces: " << getActualLinks() << endl;
+    }
   }
 
-  void printNodes()
+public:
+  DNA(string strDna)
   {
-    cout << "-------------------------\n";
-    cout << "Nodos actuales" << endl;
-    cout << "-------------------------\n";
-    for (int i = 0; i < nNodes; i++)
-    {
-      cout << "type: " << nodes[i].type << endl;
-      cout << "maxLinks: " << nodes[i].maxLinks << endl;
-      cout << "actualLinks: " << nodes[i].actualLinks << endl;
-      cout << "-------------------------\n";
-    }
+    nNodes = strDna.size();
+    dna = strDna;
+    initializeAdjMatriz();
+    initializeNodes();
+    solutions = 0;
+    bestSolution = 0;
+    bestEnergy = 0;
+    bestUsefullLife = 0;
+  }
+
+  ~DNA()
+  {
+    deleteNodes();
+    deleteAdjMatrix();
+    dna = "";
+    nNodes = 0;
+    nodes = nullptr;
+    adjMatrix = nullptr;
+    solutions = 0;
+    bestSolution = 0;
+    bestEnergy = 0;
+    bestUsefullLife = 0;
   }
 
   void backtracking()
@@ -856,32 +775,24 @@ public:
     testGraphs(0, 0);
   }
 
-  int getGlobalMaxLikns() const
-  {
-    return globalMaxLinks;
-  }
-
   int getSolutions() const
   {
     return solutions;
   }
 
-  void testStack()
+  int getBestSolution() const
   {
-    historyDNA<int> stack;
+    return bestSolution;
+  }
 
-    for (int i = 0; i < 20; i++)
-    {
-      cout << "push " << i + 1 << endl;
-      stack.Push(i + 1);
-    }
-    cout << "esta el 15? " << (stack.Include(15) ? "SI" : "NO") << endl;
-    cout << "esta el 30? " << (stack.Include(30) ? "SI" : "NO") << endl;
-    for (int i = 0; i < 20; i++)
-    {
-      cout << "pop " << stack.Top() << endl;
-      stack.Pop();
-    }
+  int getBestEnery() const
+  {
+    return bestEnergy;
+  }
+
+  int getBestUsefullLife() const
+  {
+    return bestUsefullLife;
   }
 };
 
@@ -950,19 +861,9 @@ int main(int argc, char const *argv[])
   DNA dnaNumoris = DNA(dna);
   dnaNumoris.backtracking();
   cout << "cantidad de combinaciones " << dnaNumoris.getSolutions() << endl;
-  // dnaNumoris.testStack();
+  cout << endl;
 
-  // historyDNA stack = historyDNA(dna.size());
-
-  // for (int i = 0; i < dna.size(); i++)
-  // {
-  //   cout << "push " << 50 + i << endl;
-  //   stack.push(50 + i);
-  // }
-  // for (int i = 0; i < dna.size(); i++)
-  // {
-  //   cout << "pop " << stack.pop() << endl;
-  // }
+  cout << "La mejor solucion fue la #" << dnaNumoris.getBestSolution() << " energia: " << dnaNumoris.getBestEnery() << " vida util: " << dnaNumoris.getBestUsefullLife() << endl;
 
   return 0;
 }
