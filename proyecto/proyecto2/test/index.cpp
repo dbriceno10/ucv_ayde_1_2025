@@ -107,16 +107,6 @@ public:
     }
     return flag;
   }
-
-  void PrintAll()
-  {
-    tPosition current = topNode;
-    while (current)
-    {
-      cout << current->data << endl;
-      current = current->next;
-    }
-  }
 };
 
 class DNA
@@ -156,27 +146,6 @@ class DNA
   class CycleList : public Stack<Cycle>
   {
   public:
-    bool Find(string element, Cycle &cycle)
-    {
-      if (IsEmpty())
-        return false;
-      bool flag = false;
-      Node *current = topNode;
-      while (current && !flag)
-      {
-        if (current->data.cycle == element)
-        {
-          flag = true;
-          cycle.cycle = current->data.cycle;
-          cycle.multiplier = current->data.multiplier;
-        }
-        else
-        {
-          current = current->next;
-        }
-      }
-      return flag;
-    }
     bool FindByIndex(const int &i, const int &j, const int &k, Cycle &cycle) const
     {
       if (IsEmpty())
@@ -198,15 +167,6 @@ class DNA
         }
       }
       return flag;
-    }
-    void PrintAll()
-    {
-      tPosition current = topNode;
-      while (current)
-      {
-        cout << current->data.cycle << endl;
-        current = current->next;
-      }
     }
   };
 
@@ -306,7 +266,7 @@ class DNA
     return adjMatrix[i][j] && adjMatrix[j][i];
   }
 
-  // este es el verdadero backtraking
+  // backtraking con algunas podas
   void testGraphs(const int &i, const int &j)
   {
     if (i == nNodes)
@@ -360,7 +320,7 @@ class DNA
       nextJ = 0;
     }
 
-    // Solo recorrer la mitad superior de la matriz (evita duplicados)
+    // Poda: solo recorrer la mitad superior de la matriz para evitar duplicados
     if (j <= i)
     {
       testGraphs(nextI, nextJ);
@@ -374,7 +334,7 @@ class DNA
       return;
     }
 
-    // No enlaces posibles, pero aún debemos seguir recorriendo para llegar a i == nNodes
+    // Poda: no enlaces posibles
     if (countFreeLinks() == 0)
     {
       testGraphs(nextI, nextJ); // seguir sin enlazar
@@ -476,7 +436,6 @@ class DNA
           rows[k] = 0;
         }
       }
-
       for (int k = 0; k < nNodes; k++)
       {
         if (!flag)
@@ -625,16 +584,13 @@ class DNA
         p = p->next;
       }
     }
-
     currentPath.Pop();
     visited[u] = false;
   }
-
   int buildLongestPathMatrix(bool **&longestMatrix)
   {
     bool *visited = new bool[nNodes];
     Stack<int> longestPath;
-
     // Paso 1: Obtener el camino más largo
     for (int i = 0; i < nNodes; i++)
     {
@@ -643,10 +599,8 @@ class DNA
       Stack<int> currentPath;
       dfsLongestPath(i, visited, currentPath, longestPath);
     }
-
     // Paso 2: Crear nueva submatriz
     initializeSubMatrix(longestMatrix);
-
     // Paso 3: Marcar solo los enlaces del camino más largo
     Stack<int>::tPosition p = longestPath.TopPtr();
     while (p && p->next)
@@ -684,38 +638,6 @@ class DNA
       delete[] subAdjMatrix[i];
     }
     delete[] subAdjMatrix;
-  }
-
-  void printAdj(bool **adjMatrix, bool printSolutions = false)
-  {
-    cout << "-------------------------\n";
-    cout << "    ";
-    for (int i = 0; i < nNodes; i++)
-    {
-      cout << "  " << nodes[i].type;
-    }
-    cout << endl;
-    cout << "    ";
-    for (int i = 0; i < nNodes; i++)
-    {
-      cout << "  " << i;
-    }
-    cout << endl;
-    cout << "-------------------------\n";
-    for (int i = 0; i < nNodes; i++)
-    {
-      cout << nodes[i].type << '(' << i << ')';
-      for (int j = 0; j < nNodes; j++)
-      {
-        cout << "  " << adjMatrix[i][j];
-      }
-      cout << "\n";
-    }
-    cout << "-------------------------\n";
-    if (printSolutions)
-    {
-      cout << "#" << solutions << " enlaces: " << getActualLinks() << endl;
-    }
   }
 
 public:
@@ -784,17 +706,13 @@ bool isLetter(char c)
 string readInput()
 {
   string input;
-  // cout << "Enter a string: ";
   cin >> input;
   string dna = "";
-
   char currentChar = '\0';
   int i = 0;
-
   while (i < input.size())
   {
     char c = input[i];
-
     if (isLetter(c))
     {
       // Convertimos minúscula a tipo de nodo en mayúscula
@@ -806,7 +724,6 @@ string readInput()
         currentChar = M;
       else if (c == 'c' || c == C)
         currentChar = C;
-
       dna += currentChar;
       i++;
     }
@@ -819,7 +736,6 @@ string readInput()
         num = num * 10 + (input[i] - '0');
         i++;
       }
-
       // Repetimos el carácter anterior (ya agregado una vez), num - 1 veces
       for (int j = 1; j < num; j++)
       {
@@ -832,20 +748,14 @@ string readInput()
       i++;
     }
   }
-
   return dna;
 }
 
 int main(int argc, char const *argv[])
 {
   string dna = readInput();
-  // cout << "DNA string: " << dna << endl;
   DNA dnaNumoris = DNA(dna);
   dnaNumoris.backtracking();
-  // cout << "cantidad de combinaciones " << dnaNumoris.getSolutions() << endl;
-  // cout << endl;
-
-  // cout << "La mejor solucion fue la #" << dnaNumoris.getBestSolution() << " energia: " << dnaNumoris.getBestEnery() << " vida util: " << dnaNumoris.getBestUsefullLife() << endl;
   cout << dnaNumoris.getBestEnery() << " " << dnaNumoris.getBestUsefullLife() << endl;
   return 0;
 }
