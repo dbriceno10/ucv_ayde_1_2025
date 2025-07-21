@@ -21,6 +21,7 @@ class DNA
     Node *topNode; // Puntero al tope
     int count;     // Contador de elementos
   public:
+    typedef Node *tPosition;
     // Constructor
     historyDNA() : topNode(nullptr), count(0) {}
 
@@ -61,7 +62,7 @@ class DNA
       // {
       //   cout << "Pila vacía" << endl;
       // }
-      Node *temp = topNode;
+      tPosition temp = topNode;
       topNode = topNode->next;
       delete temp;
       count--;
@@ -83,12 +84,17 @@ class DNA
       return topNode->data;
     }
 
+    tPosition TopPtr()
+    {
+      return topNode;
+    }
+
     bool Include(T element)
     {
       if (IsEmpty())
         return false;
       bool flag = false;
-      Node *current = topNode;
+      tPosition current = topNode;
       while (current && !flag)
       {
         if (current->data == element)
@@ -105,11 +111,23 @@ class DNA
 
     void PrintAll()
     {
-      Node *current = topNode;
+      tPosition current = topNode;
       while (current)
       {
         cout << current->data << endl;
         current = current->next;
+      }
+    }
+
+    void Next(tPosition node)
+    {
+      if (node->next)
+      {
+        node = node->next;
+      }
+      else
+      {
+        node = nullptr;
       }
     }
   };
@@ -174,7 +192,7 @@ class DNA
       if (IsEmpty())
         return false;
       bool flag = false;
-      Node *current = topNode;
+      tPosition current = topNode;
       while (current && !flag)
       {
         const string aux = current->data.cycle;
@@ -193,7 +211,7 @@ class DNA
     }
     void PrintAll()
     {
-      Node *current = topNode;
+      tPosition current = topNode;
       while (current)
       {
         cout << current->data.cycle << endl;
@@ -336,24 +354,33 @@ class DNA
       if (!isDisconnected())
       {
         solutions++;
-        // if (solutions == 4)
-        // {
-        printAdj();
-        // startFromNode(0);
-        // for (int i = 0; i < nNodes; i++)
-        // {
-        //   startFromNode(i);
-        // }
-        CycleList cicles;
-        detectAndClassifyCycles(cicles);
-        // cicles.PrintAll();
-        // cout << "Esta vacia? " << (cicles.IsEmpty() ? "SI" : "NO") << endl;
-        // Cycle cycle;
-        // cout << "2-3-4 esta? " << (cicles.Find("2-3-4", cycle) ? "SI" : "NO") << endl;
-        // cout << "Energia del sistema " <<  getEnergySystem()<< endl;
-        int e = getEnergySystem(cicles);
-        cout << "energia bruta " << e << endl;
-        // }
+        if (solutions == 4)
+        {
+          printAdj();
+          // startFromNode(0);
+          // for (int i = 0; i < nNodes; i++)
+          // {
+          //   startFromNode(i);
+          // }
+          CycleList cicles;
+          detectAndClassifyCycles(cicles);
+          // cicles.PrintAll();
+          // cout << "Esta vacia? " << (cicles.IsEmpty() ? "SI" : "NO") << endl;
+          // Cycle cycle;
+          // cout << "2-3-4 esta? " << (cicles.Find("2-3-4", cycle) ? "SI" : "NO") << endl;
+          // cout << "Energia del sistema " <<  getEnergySystem()<< endl;
+          int e = getEnergySystem(cicles);
+          cout << "energia bruta " << e << endl;
+          findLongestPath();
+          bool **longestMatrix;
+          buildLongestPathMatrix(longestMatrix, nNodes);
+          printSubAdj(longestMatrix, nNodes);
+          for (int x = 0; x < nNodes; x++)
+          {
+            delete[] longestMatrix[x];
+          }
+          delete[] longestMatrix;
+        }
       }
 
       return;
@@ -623,6 +650,130 @@ class DNA
         }
       }
     }
+  }
+
+  void findLongestPath()
+  {
+    bool *visited = new bool[nNodes];
+    historyDNA<int> longestPath;
+
+    for (int i = 0; i < nNodes; i++)
+    {
+      for (int v = 0; v < nNodes; v++)
+        visited[v] = false;
+      historyDNA<int> currentPath;
+      dfsLongestPath(i, visited, currentPath, longestPath);
+    }
+
+    cout << "Camino más largo encontrado (" << longestPath.Size() << " nodos):\n";
+    longestPath.PrintAll();
+    delete[] visited;
+  }
+
+  void dfsLongestPath(int u, bool *visited, historyDNA<int> &currentPath, historyDNA<int> &longestPath)
+  {
+    visited[u] = true;
+    currentPath.Push(u);
+
+    for (int v = 0; v < nNodes; v++)
+    {
+      if (adjMatrix[u][v] && !visited[v])
+      {
+        dfsLongestPath(v, visited, currentPath, longestPath);
+      }
+    }
+
+    if (currentPath.Size() > longestPath.Size())
+    {
+      longestPath.Clear();
+      // Copiar elementos manualmente
+      historyDNA<int>::tPosition p = currentPath.TopPtr();
+      historyDNA<int> temp;
+      while (p)
+      {
+        temp.Push(p->data);
+        p = p->next;
+      }
+      // Invertir para que quede en el mismo orden
+      p = temp.TopPtr();
+      while (p)
+      {
+        longestPath.Push(p->data);
+        p = p->next;
+      }
+    }
+
+    currentPath.Pop();
+    visited[u] = false;
+  }
+
+  void printSubAdj(bool **adjMatrix, int nNodes)
+  {
+    // printNodes();
+    cout << "-------------------------\n";
+    cout << "    ";
+    for (int i = 0; i < nNodes; i++)
+    {
+      cout << "  " << nodes[i].type;
+    }
+    cout << endl;
+    cout << "    ";
+    for (int i = 0; i < nNodes; i++)
+    {
+      cout << "  " << i;
+    }
+    cout << endl;
+    cout << "-------------------------\n";
+    for (int i = 0; i < nNodes; i++)
+    {
+      cout << nodes[i].type << '(' << i << ')';
+      for (int j = 0; j < nNodes; j++)
+      {
+        cout << "  " << adjMatrix[i][j];
+      }
+      cout << "\n";
+    }
+    cout << "-------------------------\n";
+  }
+
+  bool **buildLongestPathMatrix(bool **&longestMatrix, int nNodes)
+  {
+    bool *visited = new bool[nNodes];
+    historyDNA<int> longestPath;
+
+    // Paso 1: Obtener el camino más largo
+    for (int i = 0; i < nNodes; i++)
+    {
+      for (int v = 0; v < nNodes; v++)
+        visited[v] = false;
+      historyDNA<int> currentPath;
+      dfsLongestPath(i, visited, currentPath, longestPath);
+    }
+
+    // Paso 2: Crear nueva submatriz
+    longestMatrix = new bool *[nNodes];
+    for (int i = 0; i < nNodes; i++)
+    {
+      longestMatrix[i] = new bool[nNodes];
+      for (int j = 0; j < nNodes; j++)
+      {
+        longestMatrix[i][j] = false;
+      }
+    }
+
+    // Paso 3: Marcar solo los enlaces del camino más largo
+    historyDNA<int>::tPosition p = longestPath.TopPtr();
+    while (p && p->next)
+    {
+      int u = p->data;
+      int v = p->next->data;
+      longestMatrix[u][v] = true;
+      longestMatrix[v][u] = true;
+      p = p->next;
+    }
+
+    delete[] visited;
+    return longestMatrix;
   }
 
 public:
