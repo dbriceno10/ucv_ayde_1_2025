@@ -359,6 +359,12 @@ class DNA
       return;
     }
 
+    if (countFreeLinks() == 0)
+    {
+      cout << "se acabaron los enlaces" << endl;
+      return;
+    }
+
     int nextI = i, nextJ = j + 1;
     if (nextJ == nNodes)
     {

@@ -117,3 +117,59 @@ int main(int argc, char const *argv[])
   }
   return 0;
 }
+
+void findLongestPath()
+{
+  bool *visited = new bool[nNodes];
+  int maxLength = 0;
+  int *path = new int[nNodes];
+  int *bestPath = new int[nNodes];
+  int bestLen = 0;
+
+  for (int start = 0; start < nNodes; start++)
+  {
+    for (int i = 0; i < nNodes; i++)
+      visited[i] = false;
+
+    int currentLen = 0;
+    dfsLongest(start, visited, path, bestPath, currentLen, bestLen);
+  }
+
+  // Mostrar resultados
+  cout << "\n📏 Camino más largo encontrado (" << bestLen << " nodos): ";
+  for (int i = 0; i < bestLen; i++)
+  {
+    cout << bestPath[i] << "(" << nodes[bestPath[i]].type << ")";
+    if (i != bestLen - 1)
+      cout << " -> ";
+  }
+  cout << endl;
+
+  delete[] visited;
+  delete[] path;
+  delete[] bestPath;
+}
+
+void dfsLongest(int u, bool visited[], int path[], int bestPath[], int currentLen, int &bestLen)
+{
+  visited[u] = true;
+  path[currentLen] = u;
+  currentLen++;
+
+  if (currentLen > bestLen)
+  {
+    bestLen = currentLen;
+    for (int i = 0; i < bestLen; i++)
+      bestPath[i] = path[i];
+  }
+
+  for (int v = 0; v < nNodes; v++)
+  {
+    if (adjMatrix[u][v] && !visited[v])
+    {
+      dfsLongest(v, visited, path, bestPath, currentLen, bestLen);
+    }
+  }
+
+  visited[u] = false;
+}
