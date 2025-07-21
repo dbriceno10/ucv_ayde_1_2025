@@ -169,6 +169,28 @@ class DNA
       }
       return flag;
     }
+    bool FindByIndex(const int &i, const int &j, const int &k, Cycle &cycle) const
+    {
+      if (IsEmpty())
+        return false;
+      bool flag = false;
+      Node *current = topNode;
+      while (current && !flag)
+      {
+        const string aux = current->data.cycle;
+        if (aux.find(i) && aux.find(j) && aux.find(k))
+        {
+          flag = true;
+          cycle.cycle = current->data.cycle;
+          cycle.multiplier = current->data.multiplier;
+        }
+        else
+        {
+          current = current->next;
+        }
+      }
+      return flag;
+    }
     void PrintAll()
     {
       Node *current = topNode;
@@ -240,6 +262,14 @@ class DNA
     }
   }
 
+  int countFreeLinks() const
+  {
+    int freeLinks = 0;
+    for (int i = 0; i < nNodes; i++)
+      freeLinks += nodes[i].maxLinks - nodes[i].actualLinks;
+    return freeLinks;
+  }
+
   bool canLink(const int &i, const int &j)
   {
     if (i == j)
@@ -306,23 +336,24 @@ class DNA
       if (!isDisconnected())
       {
         solutions++;
-        if (solutions == 4)
-        {
-          // printAdj();
-          // startFromNode(0);
-          // for (int i = 0; i < nNodes; i++)
-          // {
-          //   startFromNode(i);
-          // }
-          CycleList cicles;
-          detectAndClassifyCycles(cicles);
-          // cicles.PrintAll();
-          // cout << "Esta vacia? " << (cicles.IsEmpty() ? "SI" : "NO") << endl;
-          // Cycle cycle;
-          // cout << "2-3-4 esta? " << (cicles.Find("2-3-4", cycle) ? "SI" : "NO") << endl;
-          // cout << "Energia del sistema " <<  getEnergySystem()<< endl;
-          getEnergySystem();
-        }
+        // if (solutions == 4)
+        // {
+        printAdj();
+        // startFromNode(0);
+        // for (int i = 0; i < nNodes; i++)
+        // {
+        //   startFromNode(i);
+        // }
+        CycleList cicles;
+        detectAndClassifyCycles(cicles);
+        // cicles.PrintAll();
+        // cout << "Esta vacia? " << (cicles.IsEmpty() ? "SI" : "NO") << endl;
+        // Cycle cycle;
+        // cout << "2-3-4 esta? " << (cicles.Find("2-3-4", cycle) ? "SI" : "NO") << endl;
+        // cout << "Energia del sistema " <<  getEnergySystem()<< endl;
+        int e = getEnergySystem(cicles);
+        cout << "energia bruta " << e << endl;
+        // }
       }
 
       return;
@@ -428,59 +459,85 @@ class DNA
     return links / 2;
   }
 
-  int getEnergySystem() const
+  int getEnergySystem(const CycleList &list) const
   {
     int energy = 0;
     for (int i = 0; i < nNodes; i++)
     {
+      if (nodes[i].type == H)
+        continue;
       int counterE = 0;
       int fileEnergy = 0;
+      bool *rows = new bool[nNodes];
+      bool flag = false;
+      Cycle cycle;
+      for (int k = 0; k < nNodes; k++)
+      {
+        if (adjMatrix[i][k] && nodes[k].type != H)
+        {
+          rows[k] = 1;
+        }
+        else
+        {
+          rows[k] = 0;
+        }
+      }
+
+      for (int k = 0; k < nNodes; k++)
+      {
+        if (!flag)
+        {
+          if (rows[k])
+          {
+            for (int m = k; k < nNodes; k++)
+            {
+              if (!flag)
+              {
+                flag = list.FindByIndex(i, k, m, cycle);
+              }
+              else
+              {
+                break;
+              }
+            }
+          }
+        }
+        else
+        {
+          break;
+        }
+      }
+
       for (int j = 0; j < nNodes; j++)
       {
-        if (nodes[i].type == H)
-          continue;
 
         // descartamos la diagonal principal
-        if (i == j || !adjMatrix[i][j])
-          continue;
-
-        // // contamos los nodos E
-        // cout << "nodo I " << nodes[i].type << "(" << i << ")" << " nodo J " << nodes[j].type << "(" << j << ")" << endl;
-        // if (nodes[i].type == E && nodes[j].type == E)
-        // {
-        //   counterE++;
-        // }
-        // // if ((nodes[i].type == E || nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
-        // if ((nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
-        // {
-        //   fileEnergy++;
-        // }
-        // if (nodes[i].type == C && nodes[j].type != H)
-        // {
-        //   fileEnergy--;
-        // }
+        if (i == j || !adjMatrix[i][j] || nodes[j].type == H)
+          continue; // // contamos los nodos E
+        int multiplier = 1;
+        if (flag && cycle.cycle.find(j))
+        {
+          // cout << "ciclo " << cycle.cycle << " i: " << i << " j: " << j << endl;
+          multiplier = cycle.multiplier;
+        }
+        if ((nodes[i].type == E || nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
+        {
+          int e = 1;
+          fileEnergy = fileEnergy + e * multiplier;
+        }
+        if ((nodes[i].type == C && nodes[j].type != H) || (nodes[j].type == C && nodes[i].type != H))
+        {
+          int e = -1;
+          fileEnergy = fileEnergy + e * multiplier;
+        }
       }
-      // if (nodes[i].type == E && counterE > 0)
-      // {
-      //   while (counterE > 0)
-      //   {
-      //     if (counterE > 1)
-      //     {
-      //       counterE = counterE - 2;
-      //       fileEnergy += 2 * 3;
-      //     }
-      //     else
-      //     {
-      //       fileEnergy++;
-      //       counterE--;
-      //     }
-      //   }
-      // }
       energy += fileEnergy;
-      // cout << "fileEnery: " << fileEnergy << endl;
+      delete[] rows;
     }
-    // cout << "the energy is: " << energy << endl;
-    return energy / 2;
+    energy = energy / 2;
+    int freeLinks = countFreeLinks();
+    energy = energy - freeLinks;
+    return energy;
   }
 
   void dfsDNA(int u, bool *visited)
@@ -541,7 +598,6 @@ class DNA
             cout << "Ciclo homogéneo (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (triplica energía)\n";
             cycle.multiplier = 3;
             list.Push(cycle);
-            cout << "hicimos push de " << cycle.cycle << endl;
           }
           else if ((ti == C || ti == M || ti == E) &&
                    (tj == C || tj == M || tj == E) &&
@@ -555,6 +611,8 @@ class DNA
           else
           {
             cout << "Ciclo (" << ti << "-" << tj << "-" << tk << ") entre nodos: " << i << ", " << j << ", " << k << " (sin efecto especial)\n";
+            cycle.multiplier = 2;
+            list.Push(cycle);
           }
         }
       }

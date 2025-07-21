@@ -32,7 +32,7 @@ public:
     {
       Pop();
     }
-    topNode = nulptr;
+    topNode = nullptr;
     count = 0;
   }
 
