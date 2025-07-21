@@ -223,7 +223,6 @@ class DNA
   int nNodes;
   Node *nodes;
   bool **adjMatrix;
-  int **indexMatrix;
   string dna;
   int globalMaxLinks = 0;
   int solutions = 0;
@@ -232,18 +231,15 @@ class DNA
   {
     // agregamos inicializacion de matriz de indices
     adjMatrix = new bool *[nNodes];
-    indexMatrix = new int *[nNodes];
     for (int i = 0; i < nNodes; i++)
     {
       adjMatrix[i] = new bool[nNodes];
-      indexMatrix[i] = new int[nNodes];
     }
     for (int i = 0; i < nNodes; i++)
     {
       for (int j = 0; j < nNodes; j++)
       {
         adjMatrix[i][j] = false;
-        indexMatrix[i][j] = -1;
       }
     }
   }
@@ -334,10 +330,8 @@ class DNA
     for (int i = 0; i < nNodes; i++)
     {
       delete[] adjMatrix[i];
-      delete[] indexMatrix[i];
     }
     delete[] adjMatrix;
-    delete[] indexMatrix;
   }
 
   bool isLinked(const int &i, const int &j) const
@@ -373,13 +367,9 @@ class DNA
           cout << "energia bruta " << e << endl;
           findLongestPath();
           bool **longestMatrix;
-          buildLongestPathMatrix(longestMatrix, nNodes);
-          printSubAdj(longestMatrix, nNodes);
-          for (int x = 0; x < nNodes; x++)
-          {
-            delete[] longestMatrix[x];
-          }
-          delete[] longestMatrix;
+          buildLongestPathMatrix(longestMatrix);
+          printSubAdj(longestMatrix);
+          deleteSubMatrix(longestMatrix);
         }
       }
 
@@ -707,7 +697,7 @@ class DNA
     visited[u] = false;
   }
 
-  void printSubAdj(bool **adjMatrix, int nNodes)
+  void printSubAdj(bool **adjMatrix)
   {
     // printNodes();
     cout << "-------------------------\n";
@@ -736,7 +726,7 @@ class DNA
     cout << "-------------------------\n";
   }
 
-  bool **buildLongestPathMatrix(bool **&longestMatrix, int nNodes)
+  void buildLongestPathMatrix(bool **&longestMatrix)
   {
     bool *visited = new bool[nNodes];
     historyDNA<int> longestPath;
@@ -751,15 +741,7 @@ class DNA
     }
 
     // Paso 2: Crear nueva submatriz
-    longestMatrix = new bool *[nNodes];
-    for (int i = 0; i < nNodes; i++)
-    {
-      longestMatrix[i] = new bool[nNodes];
-      for (int j = 0; j < nNodes; j++)
-      {
-        longestMatrix[i][j] = false;
-      }
-    }
+    initializeSubMatrix(longestMatrix);
 
     // Paso 3: Marcar solo los enlaces del camino más largo
     historyDNA<int>::tPosition p = longestPath.TopPtr();
@@ -773,7 +755,31 @@ class DNA
     }
 
     delete[] visited;
-    return longestMatrix;
+  }
+
+  void initializeSubMatrix(bool **&subAdjMatrix)
+  {
+    subAdjMatrix = new bool *[nNodes];
+    for (int i = 0; i < nNodes; i++)
+    {
+      subAdjMatrix[i] = new bool[nNodes];
+    }
+    for (int i = 0; i < nNodes; i++)
+    {
+      for (int j = 0; j < nNodes; j++)
+      {
+        subAdjMatrix[i][j] = false;
+      }
+    }
+  }
+
+  void deleteSubMatrix(bool **&subAdjMatrix)
+  {
+    for (int i = 0; i < nNodes; i++)
+    {
+      delete[] subAdjMatrix[i];
+    }
+    delete[] subAdjMatrix;
   }
 
 public:
@@ -795,7 +801,6 @@ public:
     adjMatrix = nullptr;
     globalMaxLinks = 0;
     solutions = 0;
-    indexMatrix = nullptr;
   }
 
   void printAdj()
