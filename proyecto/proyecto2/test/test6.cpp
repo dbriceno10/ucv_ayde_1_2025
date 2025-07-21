@@ -348,36 +348,34 @@ class DNA
       if (!isDisconnected())
       {
         solutions++;
-        if (solutions == 4)
-        {
-          printAdj();
-          // startFromNode(0);
-          // for (int i = 0; i < nNodes; i++)
-          // {
-          //   startFromNode(i);
-          // }
-          CycleList cicles;
-          detectAndClassifyCycles(adjMatrix, cicles);
-          int e = getEnergySystem(adjMatrix, cicles);
-          cout << "energia bruta de sistema " << e << endl;
-          findLongestPath();
-          bool **longestMatrix;
-          buildLongestPathMatrix(longestMatrix);
-          printSubAdj(longestMatrix);
-          CycleList ciclesLongest;
-          detectAndClassifyCycles(longestMatrix, ciclesLongest);
-          int eLongest = getEnergySystem(longestMatrix, cicles);
-          cout << "energia del camino mas largo " << eLongest << endl;
-          deleteSubMatrix(longestMatrix);
-        }
+        // if (solutions == 4)
+        // {
+        printAdj();
+        // startFromNode(0);
+        // for (int i = 0; i < nNodes; i++)
+        // {
+        //   startFromNode(i);
+        // }
+        CycleList cicles;
+        detectAndClassifyCycles(adjMatrix, cicles);
+        int e = getEnergySystem(adjMatrix, cicles);
+        cout << "energia bruta de sistema " << e << endl;
+        findLongestPath();
+        bool **longestMatrix;
+        buildLongestPathMatrix(longestMatrix);
+        printSubAdj(longestMatrix);
+        CycleList ciclesLongest;
+        detectAndClassifyCycles(longestMatrix, ciclesLongest);
+        int eLongest = getEnergySystem(longestMatrix, cicles);
+        cout << "energia del camino mas largo " << eLongest << endl;
+        deleteSubMatrix(longestMatrix);
+        // }
+      }
+      else
+      {
+        cout << "se descarto una opcion por se disconexo" << endl;
       }
 
-      return;
-    }
-
-    if (countFreeLinks() == 0)
-    {
-      cout << "se acabaron los enlaces" << endl;
       return;
     }
 
@@ -399,6 +397,13 @@ class DNA
     if (nodes[i].actualLinks >= nodes[i].maxLinks || nodes[j].actualLinks >= nodes[j].maxLinks)
     {
       testGraphs(nextI, nextJ);
+      return;
+    }
+
+    // No enlaces posibles, pero aún debemos seguir recorriendo para llegar a i == nNodes
+    if (countFreeLinks() == 0)
+    {
+      testGraphs(nextI, nextJ); // seguir sin enlazar
       return;
     }
 
