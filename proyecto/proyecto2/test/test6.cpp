@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <chrono>
 
 using namespace std;
 
@@ -784,7 +785,7 @@ bool isLetter(char c)
 string readInput()
 {
   string input;
-  // cout << "Enter a string: ";
+  cout << "Enter a string: ";
   cin >> input;
   string dna = "";
 
@@ -836,16 +837,23 @@ string readInput()
   return dna;
 }
 
-int main(int argc, char const *argv[])
+int main()
 {
+  // Usa std::chrono para medir el tiempo correctamente
+  auto startFxC = std::chrono::high_resolution_clock::now();
   string dna = readInput();
-  // cout << "DNA string: " << dna << endl;
+  cout << "DNA string: " << dna << endl;
   DNA dnaNumoris = DNA(dna);
   dnaNumoris.backtracking();
-  // cout << "cantidad de combinaciones " << dnaNumoris.getSolutions() << endl;
-  // cout << endl;
+  cout << "cantidad de combinaciones " << dnaNumoris.getSolutions() << endl;
+  cout << endl;
 
-  // cout << "La mejor solucion fue la #" << dnaNumoris.getBestSolution() << " energia: " << dnaNumoris.getBestEnery() << " vida util: " << dnaNumoris.getBestUsefullLife() << endl;
-  cout << dnaNumoris.getBestEnery() << " " << dnaNumoris.getBestUsefullLife() << endl;
+  cout << "La mejor solucion fue la #" << dnaNumoris.getBestSolution() << " energia: " << dnaNumoris.getBestEnery() << " vida util: " << dnaNumoris.getBestUsefullLife() << endl;
+
+  // cout << dnaNumoris.getBestEnery() << " " << dnaNumoris.getBestUsefullLife() << endl;
+  auto stopFxC = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<float, std::milli> durationFxC = stopFxC - startFxC;
+  double timeFxC = durationFxC.count();
+  cout << "Tiempo de ejecución: " << timeFxC << " ms" << endl;
   return 0;
 }
