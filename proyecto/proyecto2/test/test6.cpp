@@ -6,6 +6,7 @@
 using namespace std;
 
 char const H = 'H', E = 'E', M = 'M', C = 'C';
+const int magic = 38;
 
 template <typename T>
 class Stack
@@ -152,11 +153,54 @@ class DNA
   {
     string cycle;
     int multiplier;
+    int index1;
+    int index2;
+    int index3;
   };
 
   class CycleList : public Stack<Cycle>
   {
+    bool IncludeIndex(int indexA, int indexB, Cycle cycle)
+    {
+      int index1 = cycle.index1;
+      int index2 = cycle.index2;
+      int index3 = cycle.index3;
+      string str = to_string(indexA) + "-" + to_string(indexB);
+      string chain1 = to_string(index1) + "-" + to_string(index2);
+      string chain2 = to_string(index1) + "-" + to_string(index3);
+      string chain3 = to_string(index2) + "-" + to_string(index3);
+      string chainA = to_string(indexA) + "-" + to_string(indexB);
+      string chainB = to_string(indexB) + "-" + to_string(indexA);
+      if ((chainA == chain1) ||
+          (chainA == chain2) ||
+          (chainA == chain3) ||
+          (chainB == chain1) ||
+          (chainB == chain2) ||
+          (chainB == chain3))
+      {
+        return true;
+      }
+      return false;
+    }
+
   public:
+    int GetAllCycles(const int &indexA, const int &indexB)
+    {
+      if (IsEmpty())
+        return 1;
+      int multiplier = 1;
+      Node *current = topNode;
+      while (current)
+      {
+        if (IncludeIndex(indexA, indexB, current->data))
+        {
+          multiplier = multiplier * current->data.multiplier;
+        }
+        current = current->next;
+      }
+      return multiplier;
+    }
+
     bool Find(string element, Cycle &cycle)
     {
       if (IsEmpty())
@@ -326,6 +370,12 @@ class DNA
         int eLongest = getEnergySystem(longestMatrix, cicles);
         deleteSubMatrix(longestMatrix);
         int usefullLife = abs(eSystem * eLongest * nNodosPath * 10);
+        if (solutions == magic)
+        {
+          printAdj(adjMatrix, true);
+          cicles.PrintAll();
+          cout << "#" << solutions << " energia: " << eSystem << " vida: " << usefullLife << endl;
+        }
         if (bestSolution == 0)
         {
           bestSolution = solutions;
@@ -454,7 +504,7 @@ class DNA
     return links / 2;
   }
 
-  int getEnergySystem(bool **adjMatrix, const CycleList &list) const
+  int getEnergySystem(bool **adjMatrix, CycleList &list) const
   {
     int energy = 0;
     for (int i = 0; i < nNodes; i++)
@@ -464,44 +514,6 @@ class DNA
       int counterE = 0;
       int fileEnergy = 0;
       bool *rows = new bool[nNodes];
-      bool flag = false;
-      Cycle cycle;
-      for (int k = 0; k < nNodes; k++)
-      {
-        if (adjMatrix[i][k] && nodes[k].type != H)
-        {
-          rows[k] = 1;
-        }
-        else
-        {
-          rows[k] = 0;
-        }
-      }
-
-      for (int k = 0; k < nNodes; k++)
-      {
-        if (!flag)
-        {
-          if (rows[k])
-          {
-            for (int m = k; k < nNodes; k++)
-            {
-              if (!flag)
-              {
-                flag = list.FindByIndex(i, k, m, cycle);
-              }
-              else
-              {
-                break;
-              }
-            }
-          }
-        }
-        else
-        {
-          break;
-        }
-      }
 
       for (int j = 0; j < nNodes; j++)
       {
@@ -509,11 +521,17 @@ class DNA
         // descartamos la diagonal principal
         if (i == j || !adjMatrix[i][j] || nodes[j].type == H)
           continue; // // contamos los nodos E
-        int multiplier = 1;
-        if (flag && cycle.cycle.find(j))
+        int multiplier = list.GetAllCycles(i, j);
+        if (solutions == magic)
         {
-          // cout << "ciclo " << cycle.cycle << " i: " << i << " j: " << j << endl;
-          multiplier = cycle.multiplier;
+          string str = to_string(i) + "-" + to_string(j);
+          // cout << "multiplier " << multiplier << " con i: " << i << " con j: " << j << endl;
+          cout << "multiplier " << multiplier << " con " << str << endl;
+
+          // if (!list.IsEmpty())
+          // {
+          //   cout << "multiplier list " << list.Top().multiplier << endl;
+          // }
         }
         if ((nodes[i].type == E || nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
         {
@@ -557,10 +575,13 @@ class DNA
             continue;
 
           // Determinar el tipo de ciclo
-          string aux = to_string(i) + "-" + to_string(j) + "-" + to_string(k);
+          string aux = "|" + to_string(i) + "-" + to_string(j) + "-" + to_string(k) + "|";
           Cycle cycle;
           cycle.cycle = aux;
           cycle.multiplier = 1;
+          cycle.index1 = i;
+          cycle.index2 = j;
+          cycle.index3 = k;
           if ((ti == E && tj == E && tk == E) || (ti == C && tj == C && tk == C) || (ti == M && tj == M && tk == M))
           {
             cycle.multiplier = 3;

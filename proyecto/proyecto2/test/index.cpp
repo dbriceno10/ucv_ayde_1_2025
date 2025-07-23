@@ -107,6 +107,16 @@ public:
     }
     return flag;
   }
+
+  void PrintAll()
+  {
+    tPosition current = topNode;
+    while (current)
+    {
+      cout << current->data << endl;
+      current = current->next;
+    }
+  }
 };
 
 class DNA
@@ -141,32 +151,52 @@ class DNA
   {
     string cycle;
     int multiplier;
+    int index1;
+    int index2;
+    int index3;
   };
 
   class CycleList : public Stack<Cycle>
   {
+    bool IncludeIndex(int indexA, int indexB, Cycle cycle)
+    {
+      int index1 = cycle.index1;
+      int index2 = cycle.index2;
+      int index3 = cycle.index3;
+      string str = to_string(indexA) + "-" + to_string(indexB);
+      string chain1 = to_string(index1) + "-" + to_string(index2);
+      string chain2 = to_string(index1) + "-" + to_string(index3);
+      string chain3 = to_string(index2) + "-" + to_string(index3);
+      string chainA = to_string(indexA) + "-" + to_string(indexB);
+      string chainB = to_string(indexB) + "-" + to_string(indexA);
+      if ((chainA == chain1) ||
+          (chainA == chain2) ||
+          (chainA == chain3) ||
+          (chainB == chain1) ||
+          (chainB == chain2) ||
+          (chainB == chain3))
+      {
+        return true;
+      }
+      return false;
+    }
+
   public:
-    bool FindByIndex(const int &i, const int &j, const int &k, Cycle &cycle) const
+    int GetAllCycles(const int &indexA, const int &indexB)
     {
       if (IsEmpty())
-        return false;
-      bool flag = false;
-      tPosition current = topNode;
-      while (current && !flag)
+        return 1;
+      int multiplier = 1;
+      Node *current = topNode;
+      while (current)
       {
-        const string aux = current->data.cycle;
-        if (aux.find(i) && aux.find(j) && aux.find(k))
+        if (IncludeIndex(indexA, indexB, current->data))
         {
-          flag = true;
-          cycle.cycle = current->data.cycle;
-          cycle.multiplier = current->data.multiplier;
+          multiplier = multiplier * current->data.multiplier;
         }
-        else
-        {
-          current = current->next;
-        }
+        current = current->next;
       }
-      return flag;
+      return multiplier;
     }
   };
 
@@ -266,7 +296,7 @@ class DNA
     return adjMatrix[i][j] && adjMatrix[j][i];
   }
 
-  // backtraking con algunas podas
+  // este es el verdadero backtraking
   void testGraphs(const int &i, const int &j)
   {
     if (i == nNodes)
@@ -320,7 +350,7 @@ class DNA
       nextJ = 0;
     }
 
-    // Poda: solo recorrer la mitad superior de la matriz para evitar duplicados
+    // Solo recorrer la mitad superior de la matriz (evita duplicados)
     if (j <= i)
     {
       testGraphs(nextI, nextJ);
@@ -334,7 +364,7 @@ class DNA
       return;
     }
 
-    // Poda: no enlaces posibles
+    // No enlaces posibles, pero aún debemos seguir recorriendo para llegar a i == nNodes
     if (countFreeLinks() == 0)
     {
       testGraphs(nextI, nextJ); // seguir sin enlazar
@@ -413,7 +443,7 @@ class DNA
     return links / 2;
   }
 
-  int getEnergySystem(bool **adjMatrix, const CycleList &list) const
+  int getEnergySystem(bool **adjMatrix, CycleList &list) const
   {
     int energy = 0;
     for (int i = 0; i < nNodes; i++)
@@ -423,43 +453,6 @@ class DNA
       int counterE = 0;
       int fileEnergy = 0;
       bool *rows = new bool[nNodes];
-      bool flag = false;
-      Cycle cycle;
-      for (int k = 0; k < nNodes; k++)
-      {
-        if (adjMatrix[i][k] && nodes[k].type != H)
-        {
-          rows[k] = 1;
-        }
-        else
-        {
-          rows[k] = 0;
-        }
-      }
-      for (int k = 0; k < nNodes; k++)
-      {
-        if (!flag)
-        {
-          if (rows[k])
-          {
-            for (int m = k; k < nNodes; k++)
-            {
-              if (!flag)
-              {
-                flag = list.FindByIndex(i, k, m, cycle);
-              }
-              else
-              {
-                break;
-              }
-            }
-          }
-        }
-        else
-        {
-          break;
-        }
-      }
 
       for (int j = 0; j < nNodes; j++)
       {
@@ -467,12 +460,8 @@ class DNA
         // descartamos la diagonal principal
         if (i == j || !adjMatrix[i][j] || nodes[j].type == H)
           continue; // // contamos los nodos E
-        int multiplier = 1;
-        if (flag && cycle.cycle.find(j))
-        {
-          // cout << "ciclo " << cycle.cycle << " i: " << i << " j: " << j << endl;
-          multiplier = cycle.multiplier;
-        }
+        int multiplier = list.GetAllCycles(i, j);
+
         if ((nodes[i].type == E || nodes[i].type == M) && (nodes[j].type == E || nodes[j].type == M))
         {
           int e = 1;
@@ -515,10 +504,13 @@ class DNA
             continue;
 
           // Determinar el tipo de ciclo
-          string aux = to_string(i) + "-" + to_string(j) + "-" + to_string(k);
+          string aux = "|" + to_string(i) + "-" + to_string(j) + "-" + to_string(k) + "|";
           Cycle cycle;
           cycle.cycle = aux;
           cycle.multiplier = 1;
+          cycle.index1 = i;
+          cycle.index2 = j;
+          cycle.index3 = k;
           if ((ti == E && tj == E && tk == E) || (ti == C && tj == C && tk == C) || (ti == M && tj == M && tk == M))
           {
             cycle.multiplier = 3;
@@ -584,13 +576,16 @@ class DNA
         p = p->next;
       }
     }
+
     currentPath.Pop();
     visited[u] = false;
   }
+
   int buildLongestPathMatrix(bool **&longestMatrix)
   {
     bool *visited = new bool[nNodes];
     Stack<int> longestPath;
+
     // Paso 1: Obtener el camino más largo
     for (int i = 0; i < nNodes; i++)
     {
@@ -599,8 +594,10 @@ class DNA
       Stack<int> currentPath;
       dfsLongestPath(i, visited, currentPath, longestPath);
     }
+
     // Paso 2: Crear nueva submatriz
     initializeSubMatrix(longestMatrix);
+
     // Paso 3: Marcar solo los enlaces del camino más largo
     Stack<int>::tPosition p = longestPath.TopPtr();
     while (p && p->next)
