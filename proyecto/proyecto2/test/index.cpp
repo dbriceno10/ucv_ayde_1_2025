@@ -504,7 +504,7 @@ class DNA
             continue;
 
           // Determinar el tipo de ciclo
-          string aux = "|" + to_string(i) + "-" + to_string(j) + "-" + to_string(k) + "|";
+          string aux = to_string(i) + "-" + to_string(j) + "-" + to_string(k);
           Cycle cycle;
           cycle.cycle = aux;
           cycle.multiplier = 1;
