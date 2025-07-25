@@ -17,6 +17,15 @@ class BST
 
   Nodo *raiz;
 
+  void deleteSubTree(Nodo *nodo)
+  {
+    if (!nodo)
+      return;
+    deleteSubTree(nodo->izquierdo);
+    deleteSubTree(nodo->derecho);
+    delete nodo;
+  }
+
 public:
   BST() : raiz(nullptr) {}
   ~BST()
@@ -27,44 +36,31 @@ public:
   Nodo *insert(Nodo *nodo, int valor)
   {
     if (!nodo)
-    {
       return new Nodo(valor);
-    }
-    if (valor < nodo->valor)
-    {
-      nodo->izquierdo = insert(nodo->izquierdo, valor);
-    }
-    else
-    {
-      nodo->derecho = insert(nodo->derecho, valor);
-    }
-    nodo->altura = 1 + std::max(altura(nodo->izquierdo), altura(nodo->derecho));
 
+    if (valor < nodo->valor)
+      nodo->izquierdo = insert(nodo->izquierdo, valor);
+    else
+      nodo->derecho = insert(nodo->derecho, valor);
+
+    nodo->altura = 1 + std::max(altura(nodo->izquierdo), altura(nodo->derecho));
     int balanceAux = balance(nodo);
 
     // Caso LL
     if (balanceAux > 1 && valor < nodo->izquierdo->valor)
-    {
-      rotarDerecha(nodo); // LL
-    }
-
-    // Caso LR
-    if (balanceAux > 1 && valor > nodo->derecho->valor)
-    {
-      rotarDerecha(nodo); // RR
-    }
+      return rotarDerecha(nodo);
 
     // Caso RR
-    if (balanceAux > 1 && valor > nodo->derecho->valor)
-    {
-      // rotarIzquierda(nodo); // RR
-    }
+    if (balanceAux < -1 && valor > nodo->derecho->valor)
+      return rotarIzquierda(nodo);
+
+    // Caso LR
+    if (balanceAux > 1 && valor > nodo->izquierdo->valor)
+      return rotarIzquierdaDerecha(nodo);
 
     // Caso RL
-    if (balanceAux < -1 && valor > nodo->izquierdo->valor)
-    {
-      // rotarIzquierda(nodo); // LL
-    }
+    if (balanceAux < -1 && valor < nodo->derecho->valor)
+      return rotarDerechaIzquierda(nodo);
 
     return nodo;
   }
@@ -133,14 +129,14 @@ public:
       // caso 2a: tiene un hijo derecho o 1 hijo
       if (!nodo->derecho)
       {
-        Nodo *temp = nodo->derecho;
+        Nodo *temp = nodo->izquierdo;
         delete nodo;
         return temp;
       }
       // caso 2b: tiene un hijo izquierdo o 1 hijo
       if (!nodo->izquierdo)
       {
-        Nodo *temp = nodo->izquierdo;
+        Nodo *temp = nodo->derecho;
         delete nodo;
         return temp;
       }
@@ -206,22 +202,53 @@ public:
     // return altura(nodo->derecho) + altura(nodo->izquierdo); otra forma
   }
 
-  //(LL)
+  // (LL) Rotación simple a la derecha
   Nodo *rotarDerecha(Nodo *x)
   {
-    Nodo *y = x->derecho;   // el hijo derecho se convierte en el nuevo nodo raíz
-    Nodo *z = y->izquierdo; // el subarbol izquierdo
+    Nodo *y = x->izquierdo; // el hijo izquierdo se convierte en el nuevo nodo raíz
+    Nodo *z = y->derecho;   // el subárbol derecho de y
 
-    // rotar, el hijo se vuelve padre y el padre se vuelve hijo
-    y->izquierdo;
-    x->derecho = z; // el hijo derecho del padre ahora es el subarbol izquierdo
+    // Realizar rotación
+    y->derecho = x;
+    x->izquierdo = z;
 
-    // x->altura = max(altura(x->izquierdo), altura(x->derecho)) + 1; // actualizar altura del padre
-    y->altura = 1 + std::max(altura(y->izquierdo), altura(y->derecho)); // actualizar altura del hijo
-    x->altura = 1 + std::max(altura(x->izquierdo), altura(x->derecho)); // actualizar altura del padre
+    // Actualizar alturas
+    x->altura = 1 + std::max(altura(x->izquierdo), altura(x->derecho));
+    y->altura = 1 + std::max(altura(y->izquierdo), altura(y->derecho));
+
+    return y;
   }
 
-  //(RR) seria casi identico a rotarDerecha
+  // (RR) Rotación simple a la izquierda
+  Nodo *rotarIzquierda(Nodo *x)
+  {
+    Nodo *y = x->derecho;   // el hijo derecho se convierte en el nuevo nodo raíz
+    Nodo *z = y->izquierdo; // el subárbol izquierdo de y
+
+    // Realizar rotación
+    y->izquierdo = x;
+    x->derecho = z;
+
+    // Actualizar alturas
+    x->altura = 1 + std::max(altura(x->izquierdo), altura(x->derecho));
+    y->altura = 1 + std::max(altura(y->izquierdo), altura(y->derecho));
+
+    return y;
+  }
+
+  // (LR) Rotación doble izquierda-derecha
+  Nodo *rotarIzquierdaDerecha(Nodo *x)
+  {
+    x->izquierdo = rotarIzquierda(x->izquierdo);
+    return rotarDerecha(x);
+  }
+
+  // (RL) Rotación doble derecha-izquierda
+  Nodo *rotarDerechaIzquierda(Nodo *x)
+  {
+    x->derecho = rotarDerecha(x->derecho);
+    return rotarIzquierda(x);
+  }
 };
 
 int main()
