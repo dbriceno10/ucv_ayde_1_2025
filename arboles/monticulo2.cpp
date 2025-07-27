@@ -10,8 +10,6 @@ class Heap
     Nodo *izquierdo;
     Nodo *derecho;
     int altura;
-    // la altura se puede inicializar en 1 para el nodo raíz
-    //  o en 0 si se considera que un nodo hoja tiene altura 0
     Nodo(int val) : valor(val), izquierdo(nullptr), derecho(nullptr), altura(1) {}
   };
 
@@ -20,22 +18,21 @@ class Heap
 public:
   Nodo *insert(Nodo *nodo, int valor)
   {
-
     if (!nodo)
     {
       return new Nodo(valor);
     }
-    if (!nodo->izquierdo)
+    // Inserta primero por la rama menos llena (nivel más bajo)
+    int alturaIzq = getAltura(nodo->izquierdo);
+    int alturaDer = getAltura(nodo->derecho);
+
+    if (alturaIzq <= alturaDer)
     {
       nodo->izquierdo = insert(nodo->izquierdo, valor);
-    }
-    else if (!nodo->derecho)
-    {
-      nodo->derecho = insert(nodo->derecho, valor);
     }
     else
     {
-      nodo->izquierdo = insert(nodo->izquierdo, valor);
+      nodo->derecho = insert(nodo->derecho, valor);
     }
     return reestucturar(nodo); // balancear
   }
@@ -43,20 +40,18 @@ public:
   Nodo *reestucturar(Nodo *nodo)
   { // balancear
     if (!nodo)
-    {
       return nullptr;
-    }
 
     if (nodo->izquierdo && nodo->izquierdo->valor > nodo->valor)
     {
-      std::swap(nodo->valor, nodo->izquierdo->valor); // esto es una trampa, ya que intercambio los valores en lugar de los punteros
-      nodo = reestucturar(nodo->izquierdo);           // rotamos
+      std::swap(nodo->valor, nodo->izquierdo->valor);
+      nodo->izquierdo = reestucturar(nodo->izquierdo);
     }
 
     if (nodo->derecho && nodo->derecho->valor > nodo->valor)
     {
-      std::swap(nodo->valor, nodo->derecho->valor); // esto es una trampa, ya que intercambio los valores en lugar de los punteros
-      nodo = reestucturar(nodo->derecho);           // rotamos
+      std::swap(nodo->valor, nodo->derecho->valor);
+      nodo->derecho = reestucturar(nodo->derecho);
     }
     return nodo;
   }
@@ -64,10 +59,9 @@ public:
   Nodo *max(Nodo *nodo, int &valor)
   {
     if (!nodo)
-    {
       return nullptr; // árbol vacío
-    }
-    valor = nodo->valor; // asignar el valor del nodo actual
+
+    valor = nodo->valor;
     Nodo *mayor = nullptr;
     if (nodo->izquierdo || nodo->derecho)
     {
@@ -79,22 +73,37 @@ public:
       {
         mayor = nodo->izquierdo;
       }
-      // else if (nodo->derecho) // puede ser un else
       else
       {
         mayor = nodo->derecho;
       }
-      nodo->valor = mayor->valor; // asignar el valor del nodo mayor al nodo actual
+      nodo->valor = mayor->valor;
       nodo->izquierdo = max(nodo->izquierdo, mayor->valor);
       nodo->derecho = max(nodo->derecho, mayor->valor);
     }
-    return nodo; // yo era el mayor
+    return nodo;
+  }
+
+  int getAltura(Nodo *nodo)
+  {
+    if (!nodo) return 0;
+    int izq = getAltura(nodo->izquierdo);
+    int der = getAltura(nodo->derecho);
+    return 1 + (izq > der ? izq : der);
   }
 
   Heap() : raiz(nullptr) {}
   ~Heap()
   {
-    // deleteSubTree(raiz);
+    deleteSubTree(raiz);
+  }
+
+  void deleteSubTree(Nodo *nodo)
+  {
+    if (!nodo) return;
+    deleteSubTree(nodo->izquierdo);
+    deleteSubTree(nodo->derecho);
+    delete nodo;
   }
 
   void insertar(int valor)
@@ -120,7 +129,6 @@ public:
 
 int main()
 {
-
   Heap heap;
   heap.insertar(10);
   heap.insertar(20);
@@ -130,14 +138,6 @@ int main()
   heap.insertar(30);
 
   heap.mostrar(); // Debe mostrar los valores en orden de heap
-
-  //                10
-  //              /    \
-  //            20      5
-  //           /
-  //          7      2    30
-
-  // implementar que ordene al insertar
 
   return 0;
 }
