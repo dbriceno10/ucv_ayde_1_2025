@@ -71,8 +71,8 @@ class EulerCraft
 
   void linkBridges(const int &x, const int &y)
   {
-    adjMatrix[x - 1][y - 1] = 1;
-    adjMatrix[y - 1][x - 1] = 1;
+    adjMatrix[x - 1][y - 1] = true;
+    adjMatrix[y - 1][x - 1] = true;
   }
 
   void printAdj(bool **adjMatrix)
