@@ -17,13 +17,6 @@ class EulerCraft
     {
       adjMatrix[i] = new bool[N];
     }
-    for (int i = 0; i < N; i++)
-    {
-      for (int j = 0; j < N; j++)
-      {
-        adjMatrix[i][j] = false;
-      }
-    }
   }
 
   void deleteAdjMatrix()
