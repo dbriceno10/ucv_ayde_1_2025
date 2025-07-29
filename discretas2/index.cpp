@@ -32,38 +32,20 @@ class EulerCraft
     delete[] adjMatrix;
   }
 
-  void readFile(string filename)
+  void readFile()
   {
-    ifstream file;
-    file.open(filename, ios::in);
-    if (file.is_open())
+    cin >> N;
+    cin >> M;
+    cin >> T;
+    cin >> P;
+    adjMatrix = initializeAdj();
+    for (int i = 0; i < M; i++)
     {
-      file >> N >> M;
-      file >> T;
-      file >> P;
-
-      adjMatrix = initializeAdj();
-
-      for (int i = 0; i < M; i++)
-      {
-        int x = 0, y = 0;
-        file >> x >> y;
-        linkBridges(x, y);
-      }
-      file.close();
+      int x = 0, y = 0;
+      cin >> x;
+      cin >> y;
+      linkBridges(x, y);
     }
-    else
-    {
-      cout << "No se pudo abrir el archivo " << filename << endl;
-    }
-  }
-
-  void openFile()
-  {
-    int index = 0;
-    cout << "Numero del archivo" << endl;
-    cin >> index;
-    readFile("Entrada" + to_string(index) + ".txt");
   }
 
   void linkBridges(const int &u, const int &v)
@@ -115,7 +97,7 @@ public:
   EulerCraft()
   {
     adjMatrix = nullptr;
-    openFile();
+    readFile();
   }
 
   ~EulerCraft()
