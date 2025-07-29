@@ -207,7 +207,6 @@ public:
 int main()
 {
   EulerCraft euler;
-  euler.print();
   euler.evaluate();
   return 0;
 }
