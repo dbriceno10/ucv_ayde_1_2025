@@ -6,24 +6,21 @@ using namespace std;
 
 class EulerCraft
 {
-  //* N --> dimension de la matriz, M --> Numero inicial de aristas, T--> tiempo restante para la procesion, P --> tiempo que tarda al construir un puente
   int N = 0, M = 0, T = 0, P = 0;
-  bool **adjMatrix;
+  int **adjMatrix;
 
-  void initializeAdj()
+  int **initializeAdj()
   {
-    adjMatrix = new bool *[N];
+    int **matrix = new int *[N];
     for (int i = 0; i < N; i++)
     {
-      adjMatrix[i] = new bool[N];
-    }
-    for (int i = 0; i < N; i++)
-    {
+      matrix[i] = new int[N];
       for (int j = 0; j < N; j++)
       {
-        adjMatrix[i][j] = false;
+        matrix[i][j] = 0;
       }
     }
+    return matrix;
   }
 
   void deleteAdjMatrix()
@@ -44,13 +41,13 @@ class EulerCraft
       file >> N >> M;
       file >> T;
       file >> P;
-      // cout << "N " << N << " M " << M << " T " << T << " P " << P << endl;
-      initializeAdj();
+
+      adjMatrix = initializeAdj();
+
       for (int i = 0; i < M; i++)
       {
         int x = 0, y = 0;
         file >> x >> y;
-        // cout << "x " << x << " y " << y << endl;
         linkBridges(x, y);
       }
       file.close();
@@ -69,13 +66,12 @@ class EulerCraft
     readFile("Entrada" + to_string(index) + ".txt");
   }
 
-  void linkBridges(const int &x, const int &y)
+  void linkBridges(const int &u, const int &v)
   {
-    adjMatrix[x - 1][y - 1] = true;
-    adjMatrix[y - 1][x - 1] = true;
+    adjMatrix[u - 1][v - 1]++;
   }
 
-  void printAdj(bool **adjMatrix)
+  void printAdj(int **adjMatrix)
   {
     cout << "-------------------------\n";
     cout << endl;
@@ -97,37 +93,28 @@ class EulerCraft
     cout << "-------------------------\n";
   }
 
-  void dfs(int u, bool *visited)
+  int getOutDegree(int v, int **matrix)
   {
-    visited[u] = true;
-    cout << "Visitando nodo " << "(" << u + 1 << ")" << endl;
+    int degree = 0;
+    for (int i = 0; i < N; ++i)
+      degree += matrix[v][i];
 
-    for (int v = 0; v < N; v++)
-    {
-      if (adjMatrix[u][v] && !visited[v])
-      {
-        dfs(v, visited);
-      }
-    }
+    return degree;
   }
 
-  void traverseGraph()
+  int getInDegree(int v, int **matrix)
   {
-    bool *visited = new bool[N];
-    for (int i = 0; i < N; i++)
-    {
-      visited[i] = false;
-    }
+    int degree = 0;
+    for (int i = 0; i < N; ++i)
+      degree += matrix[i][v];
 
-    cout << "Iniciando recorrido del grafo completo desde nodo 1:" << endl;
-    dfs(0, visited);
-
-    delete[] visited;
+    return degree;
   }
 
 public:
   EulerCraft()
   {
+    adjMatrix = nullptr;
     openFile();
   }
 
@@ -145,16 +132,100 @@ public:
     printAdj(adjMatrix);
   }
 
-  void traverse()
+  void evaluate()
   {
-    traverseGraph();
+    int excessOutCount = 0;
+    int excessInCount = 0;
+    int verticeWithExcessOut = -1;
+    int verticeWithExcessIn = -1;
+
+    // we verify if the Eulerian path is possible with the construction of a bridge (new edge).
+    for (int i = 0; i < N; i++)
+    {
+      int outDeg = getOutDegree(i, adjMatrix);
+      int inDeg = getInDegree(i, adjMatrix);
+
+      if (outDeg == inDeg + 1)
+      {
+        excessOutCount++;
+        verticeWithExcessOut = i;
+      }
+      else if (inDeg == outDeg + 1)
+      {
+        excessInCount++;
+        verticeWithExcessIn = i;
+      }
+      else if (outDeg != inDeg)
+      { // if the imbalance between the two nodes is greater than one, the bridge will not make the path possible.
+        excessOutCount = 2;
+        excessInCount = 2;
+        break;
+      }
+    }
+
+    if (excessOutCount == 0 && excessInCount == 0)
+    { // all vertices are balanced, the path is possible by definition.
+      cout << "No es necesario hacer cambios" << endl;
+      return;
+    }
+    else if (excessOutCount == 1 && excessInCount == 1)
+    {
+      // checks if the vertices were updated correctly, and if an edge already existed between them.
+      if ((verticeWithExcessIn != -1 && verticeWithExcessOut != -1) &&
+          (adjMatrix[verticeWithExcessIn][verticeWithExcessOut] > 0 || adjMatrix[verticeWithExcessOut][verticeWithExcessIn] > 0))
+      {
+
+        if (P <= T)
+        { // it is verified that it is possible to build the bridge (new edge).
+
+          // we make a copy of the adjacency matrix to verify if the change makes the Eulerian path possible.
+          int **tempAdjMatrix = initializeAdj();
+          for (int i = 0; i < N; ++i)
+          {
+            for (int j = 0; j < N; ++j)
+              tempAdjMatrix[i][j] = adjMatrix[i][j];
+          }
+
+          // we add the extra edge (the bridge).
+          tempAdjMatrix[verticeWithExcessIn][verticeWithExcessOut]++;
+
+          bool allDegreesBalanced = true;
+          for (int i = 0; i < N; ++i)
+          {
+            if (getOutDegree(i, tempAdjMatrix) != getInDegree(i, tempAdjMatrix))
+            {
+              allDegreesBalanced = false;
+              break;
+            }
+          }
+
+          if (allDegreesBalanced)
+          {
+            cout << "Es posible modificar la ciudad" << endl;
+            return;
+          }
+          else
+          {
+            cout << "Debo presentar mi renuncia" << endl;
+            return;
+          }
+
+          for (int i = 0; i < N; ++i)
+          {
+            delete[] tempAdjMatrix[i];
+          }
+          delete[] tempAdjMatrix;
+        }
+      }
+    }
+    cout << "Debo presentar mi renuncia" << endl; // if the path is not possible in any way.
   }
 };
 
-int main(int argc, char const *argv[])
+int main()
 {
   EulerCraft euler;
   euler.print();
-  euler.traverse();
+  euler.evaluate();
   return 0;
 }
